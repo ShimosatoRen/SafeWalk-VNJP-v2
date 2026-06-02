@@ -1,36 +1,146 @@
-﻿@model IReadOnlyList<SampleItem>
-
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "ホーム";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-container">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7 text-center text-lg-start">
+                <h1 class="hero-title">SafeWalk VNJP</h1>
+                <h2 class="hero-subtitle mb-4">歩行者の安全のために、<br>危険情報を共有しよう</h2>
+                <p class="lead mb-5">あなたの投稿が、誰かの命を守ります。</p>
+                <div class="d-flex justify-content-center justify-content-lg-start gap-3">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-5 py-3">ログイン</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg px-5 py-3">新規登録</a>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="position-relative">
+                    <!-- Mobile Mockup Wrapper -->
+                    <div class="bg-dark rounded-4 p-2 shadow-lg mx-auto" style="width: 280px; height: 580px; border: 8px solid #333;">
+                        <div class="bg-white h-100 rounded-3 overflow-hidden position-relative">
+                            <div class="bg-primary p-3 text-white">
+                                <small>8:45</small>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="fw-bold">SafeWalk VNJP</span>
+                                    <i class="bi bi-list"></i>
+                                </div>
+                            </div>
+                            <div class="p-4 text-center">
+                                <h5 class="fw-bold mt-4">歩行者の安全のために、危険情報を共有しよう</h5>
+                                <p class="small text-muted mt-3">あなたの投稿が、誰かの命を守ります。</p>
+                                <div class="d-grid gap-2 mt-5">
+                                    <button class="btn btn-primary btn-sm">ログイン</button>
+                                    <button class="btn btn-outline-dark btn-sm">新規登録</button>
+                                </div>
+                                <div class="mt-5 text-start">
+                                    <h6 class="fw-bold small">最近の危険地点</h6>
+                                    <div class="bg-light p-2 rounded small mb-2 text-start">
+                                        <div class="fw-bold">横断が非常に困難</div>
+                                        <span class="badge bg-danger p-1" style="font-size: 0.6rem;">横断困難</span>
+                                    </div>
+                                    <img src="https://api.placeholder.com/240/120?text=Map+Preview" class="img-fluid rounded border" alt="Map Preview">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<section class="mt-5">
-    <h2>Sample Items</h2>
+<div class="container mb-5">
+    <div class="row g-4">
+        <!-- Purpose -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3 text-primary">
+                            <i class="bi bi-shield-check fs-3"></i>
+                        </div>
+                        <h5 class="card-title fw-bold m-0">このアプリの目的</h5>
+                    </div>
+                    <p class="text-muted">歩行者が安全に移動できるように、危険な場所の情報を共有することで、事故やトラブルを未然に防ぎます。</p>
+                </div>
+            </div>
+        </div>
+        <!-- Usage -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3 text-primary">
+                            <i class="bi bi-person-walking fs-3"></i>
+                        </div>
+                        <h5 class="card-title fw-bold m-0">使い方</h5>
+                    </div>
+                    <ol class="text-muted ps-3">
+                        <li class="mb-2">危険な場所を見つけたら投稿</li>
+                        <li class="mb-2">他の人の投稿を確認して注意</li>
+                        <li class="mb-2">安全な街づくりに貢献しよう</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <!-- Quick Stats or Info -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm bg-primary text-white">
+                <div class="card-body p-4 d-flex flex-column justify-content-center text-center">
+                    <h4 class="fw-bold mb-3">安全な街を一緒に</h4>
+                    <p class="mb-4">今すぐ参加して、あなたの周りの危険な場所を共有しましょう。</p>
+                    <a asp-controller="DangerSpots" asp-action="Index" class="btn btn-light fw-bold">危険地点一覧を見る</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <table class="table table-striped table-bordered align-middle">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Description</th>
-                <th scope="col">Created At</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.Id</td>
-                    <td>@item.Name</td>
-                    <td>@item.Description</td>
-                    <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</section>
+    <div class="row mt-5">
+        <div class="col-lg-6 mb-4">
+            <h5 class="fw-bold mb-4 border-start border-primary border-4 ps-3">危険レベル</h5>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row text-center">
+                        <div class="col">
+                            <span class="badge-danger-level badge-1 mb-2">1</span>
+                            <div class="small fw-bold">軽微</div>
+                        </div>
+                        <div class="col">
+                            <span class="badge-danger-level badge-2 mb-2">2</span>
+                            <div class="small fw-bold">注意</div>
+                        </div>
+                        <div class="col">
+                            <span class="badge-danger-level badge-3 mb-2">3</span>
+                            <div class="small fw-bold">危険</div>
+                        </div>
+                        <div class="col">
+                            <span class="badge-danger-level badge-4 mb-2">4</span>
+                            <div class="small fw-bold">非常に危険</div>
+                        </div>
+                        <div class="col">
+                            <span class="badge-danger-level badge-5 mb-2">5</span>
+                            <div class="small fw-bold">回避推奨</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <h5 class="fw-bold mb-4 border-start border-primary border-4 ps-3">カテゴリ</h5>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="category-tag"><i class="bi bi-signpost-2 me-1"></i> 横断困難</span>
+                        <span class="category-tag"><i class="bi bi-hammer me-1"></i> 歩道未整備</span>
+                        <span class="category-tag"><i class="bi bi-bicycle me-1"></i> バイク交通量過多</span>
+                        <span class="category-tag"><i class="bi bi-water me-1"></i> 冠水エリア</span>
+                        <span class="category-tag"><i class="bi bi-moon-stars me-1"></i> 夜間危険</span>
+                        <span class="category-tag"><i class="bi bi-cone-striped me-1"></i> 工事中</span>
+                        <span class="category-tag"><i class="bi bi-traffic-light me-1"></i> 信号機なし</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
