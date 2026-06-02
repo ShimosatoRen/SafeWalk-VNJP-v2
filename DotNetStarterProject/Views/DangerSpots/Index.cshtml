@@ -1,5 +1,9 @@
+@model IEnumerable<DotNetStarterProject.Models.DangerSpot>
 @{
     ViewData["Title"] = "危険地点一覧";
+    var currentCategory = ViewData["CurrentCategory"] as string;
+    var currentDangerLevel = ViewData["CurrentDangerLevel"] as int?;
+    var currentFilter = ViewData["CurrentFilter"] as string;
 }
 
 <div class="container py-5">
@@ -13,32 +17,34 @@
     <!-- Filter Bar -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-3">
-            <form class="row g-3 align-items-end">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">カテゴリ</label>
-                    <select class="form-select border-0 bg-light">
+                    <select name="category" class="form-select border-0 bg-light">
                         <option value="">すべて</option>
-                        <option>横断困難</option>
-                        <option>歩道未整備</option>
-                        <option>バイク交通量過多</option>
-                        <option>冠水エリア</option>
-                        <option>夜間危険</option>
+                        <option selected="@(currentCategory == "横断困難")">横断困難</option>
+                        <option selected="@(currentCategory == "歩道未整備")">歩道未整備</option>
+                        <option selected="@(currentCategory == "バイク交通量過多")">バイク交通量過多</option>
+                        <option selected="@(currentCategory == "冠水エリア")">冠水エリア</option>
+                        <option selected="@(currentCategory == "夜間危険")">夜間危険</option>
+                        <option selected="@(currentCategory == "工事中")">工事中</option>
+                        <option selected="@(currentCategory == "信号機なし")">信号機なし</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted">危険レベル</label>
-                    <select class="form-select border-0 bg-light">
+                    <select name="dangerLevel" class="form-select border-0 bg-light">
                         <option value="">すべて</option>
-                        <option value="1">1 (軽微)</option>
-                        <option value="2">2 (注意)</option>
-                        <option value="3">3 (危険)</option>
-                        <option value="4">4 (非常に危険)</option>
-                        <option value="5">5 (回避推奨)</option>
+                        <option value="1" selected="@(currentDangerLevel == 1)">1 (軽微)</option>
+                        <option value="2" selected="@(currentDangerLevel == 2)">2 (注意)</option>
+                        <option value="3" selected="@(currentDangerLevel == 3)">3 (危険)</option>
+                        <option value="4" selected="@(currentDangerLevel == 4)">4 (非常に危険)</option>
+                        <option value="5" selected="@(currentDangerLevel == 5)">5 (回避推奨)</option>
                     </select>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label small fw-bold text-muted">キーワード検索</label>
-                    <input type="text" class="form-control border-0 bg-light" placeholder="キーワードを入力">
+                    <input type="text" name="searchString" class="form-control border-0 bg-light" placeholder="キーワードを入力" value="@currentFilter">
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-dark w-100 fw-bold">
@@ -64,71 +70,44 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Mock Data Row 1 -->
-                    <tr>
-                        <td class="ps-4 fw-bold text-muted">103</td>
-                        <td class="fw-bold">横断が非常に困難</td>
-                        <td><span class="category-tag text-danger border-danger">横断困難</span></td>
-                        <td class="text-center">
-                            <span class="badge-danger-level badge-5">5</span>
-                        </td>
-                        <td class="small text-muted">2024/05/20 14:30</td>
-                        <td class="text-end pe-4">
-                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">詳細</a>
-                        </td>
-                    </tr>
-                    <!-- Mock Data Row 2 -->
-                    <tr>
-                        <td class="ps-4 fw-bold text-muted">102</td>
-                        <td class="fw-bold">歩道が途切れている</td>
-                        <td><span class="category-tag text-warning border-warning">歩道未整備</span></td>
-                        <td class="text-center">
-                            <span class="badge-danger-level badge-4">4</span>
-                        </td>
-                        <td class="small text-muted">2024/05/19 10:15</td>
-                        <td class="text-end pe-4">
-                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">詳細</a>
-                        </td>
-                    </tr>
-                    <!-- Mock Data Row 3 -->
-                    <tr>
-                        <td class="ps-4 fw-bold text-muted">101</td>
-                        <td class="fw-bold">バイクの交通量が多い交差点</td>
-                        <td><span class="category-tag text-warning border-warning">バイク交通量過多</span></td>
-                        <td class="text-center">
-                            <span class="badge-danger-level badge-4">4</span>
-                        </td>
-                        <td class="small text-muted">2024/05/18 18:45</td>
-                        <td class="text-end pe-4">
-                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">詳細</a>
-                        </td>
-                    </tr>
-                    <!-- Mock Data Row 4 -->
-                    <tr>
-                        <td class="ps-4 fw-bold text-muted">100</td>
-                        <td class="fw-bold">冠水しやすいエリア</td>
-                        <td><span class="category-tag text-info border-info">冠水エリア</span></td>
-                        <td class="text-center">
-                            <span class="badge-danger-level badge-3">3</span>
-                        </td>
-                        <td class="small text-muted">2024/05/18 09:20</td>
-                        <td class="text-end pe-4">
-                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">詳細</a>
-                        </td>
-                    </tr>
-                    <!-- Mock Data Row 5 -->
-                    <tr>
-                        <td class="ps-4 fw-bold text-muted">99</td>
-                        <td class="fw-bold">夜間は暗くて危険</td>
-                        <td><span class="category-tag text-secondary border-secondary">夜間危険</span></td>
-                        <td class="text-center">
-                            <span class="badge-danger-level badge-3">3</span>
-                        </td>
-                        <td class="small text-muted">2024/05/17 21:10</td>
-                        <td class="text-end pe-4">
-                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">詳細</a>
-                        </td>
-                    </tr>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                登録された危険地点がありません。
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold text-muted">@item.Id</td>
+                            <td class="fw-bold">@item.Title</td>
+                            <td>
+                                @{
+                                    var (tagClass, displayName) = item.Category switch
+                                    {
+                                        "Crossing" => ("text-danger border-danger", "横断困難"),
+                                        "NoSidewalk" => ("text-warning border-warning", "歩道未整備"),
+                                        "HeavyTraffic" => ("text-warning border-warning", "バイク交通量過多"),
+                                        "Flood" => ("text-info border-info", "冠水エリア"),
+                                        "NightRisk" => ("text-secondary border-secondary", "夜間危険"),
+                                        "Construction" => ("text-primary border-primary", "工事中"),
+                                        "NoSignal" => ("text-primary border-primary", "信号機なし"),
+                                        _ => ("text-primary border-primary", item.Category)
+                                    };
+                                }
+                                <span class="category-tag @tagClass">@displayName</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge-danger-level badge-@item.DangerLevel">@item.DangerLevel</span>
+                            </td>
+                            <td class="small text-muted">@item.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                            <td class="text-end pe-4">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">詳細</a>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
