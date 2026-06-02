@@ -4,54 +4,58 @@
     ViewData["Title"] = "ログイン";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5 col-lg-4">
-            <div class="card card-form shadow-sm">
-                <div class="card-header text-center py-4 bg-white border-bottom">
-                    <h2 class="fw-bold h4 mb-0">ログイン</h2>
-                </div>
-                <div class="card-body p-4">
-                    <form asp-action="Login" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
-                        
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label small fw-bold text-muted">メールアドレス</label>
-                            <input asp-for="Email" class="form-control border-0 bg-light p-3" placeholder="メールアドレスを入力" />
-                            <span asp-validation-for="Email" class="text-danger small"></span>
-                        </div>
+<div class="auth-page">
 
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label small fw-bold text-muted">パスワード</label>
-                            <input asp-for="Password" class="form-control border-0 bg-light p-3" placeholder="パスワードを入力" />
-                            <span asp-validation-for="Password" class="text-danger small"></span>
-                        </div>
+    <div class="auth-card">
 
-                        <div class="mb-4 d-flex justify-content-between align-items-center">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="rememberMe">
-                                <label class="form-check-label small text-muted" for="rememberMe">
-                                    ログイン状態を保持する
-                                </label>
-                            </div>
-                        </div>
+        <h2>ログイン</h2>
 
-                        <div class="d-grid mb-4">
-                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm py-3">ログイン</button>
-                        </div>
+        <form asp-action="Login" method="post">
 
-                        <div class="text-center">
-                            <a href="#" class="small text-decoration-none">パスワードを忘れた方はこちら</a>
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer bg-light border-0 text-center py-3">
-                    <span class="small text-muted">アカウントをお持ちでないですか？</span>
-                    <a asp-action="Register" class="small fw-bold text-decoration-none ms-1">新規登録</a>
-                </div>
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
             </div>
+
+            <div class="mb-3">
+                <label asp-for="Email"></label>
+                <input asp-for="Email"
+                       class="form-control"
+                       placeholder="メールアドレスを入力">
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password"></label>
+                <input asp-for="Password"
+                       class="form-control"
+                       placeholder="パスワードを入力">
+            </div>
+
+            <div class="form-check mb-4">
+                <input asp-for="RememberMe"
+                       class="form-check-input">
+
+                <label asp-for="RememberMe"
+                       class="form-check-label">
+                    ログイン状態を保持する
+                </label>
+            </div>
+
+            <button class="btn btn-primary w-100">
+                ログイン
+            </button>
+
+        </form>
+
+        <div class="text-center mt-4">
+
+            <a href="#">
+                パスワードを忘れた方はこちら
+            </a>
+
         </div>
+
     </div>
+
 </div>
 
 @section Scripts {

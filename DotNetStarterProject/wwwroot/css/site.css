@@ -152,3 +152,38 @@ footer.footer-custom {
 .btn-register:hover {
     background-color: #0056b3;
 }
+
+.auth-page {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f7fa;
+    padding: 30px 15px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 450px;
+    background: white;
+    border-radius: 16px;
+    padding: 35px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.08);
+}
+
+    .auth-card h2 {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 30px;
+    }
+
+    .auth-card .form-control {
+        height: 48px;
+        border-radius: 10px;
+    }
+
+    .auth-card .btn-primary {
+        height: 48px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
