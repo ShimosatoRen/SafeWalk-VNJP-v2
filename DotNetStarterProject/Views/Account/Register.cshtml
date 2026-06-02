@@ -1,29 +1,70 @@
 @model RegisterViewModel
 
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "新規登録";
 }
 
-<h1>Register</h1>
+<div class="auth-page">
 
-<form asp-action="Register" method="post" class="col-12 col-md-6 col-lg-4">
-    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="auth-card">
 
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" autocomplete="username" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+        <h2>ユーザー登録</h2>
+
+        <form asp-action="Register" method="post">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="UserName"></label>
+                <input asp-for="UserName"
+                       class="form-control"
+                       placeholder="ユーザー名を入力">
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email"></label>
+                <input asp-for="Email"
+                       class="form-control"
+                       placeholder="メールアドレスを入力">
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password"></label>
+                <input asp-for="Password"
+                       class="form-control"
+                       placeholder="パスワードを入力">
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword"
+                       class="form-control"
+                       placeholder="パスワードを再入力">
+            </div>
+
+            <button class="btn btn-primary w-100">
+                登録する
+            </button>
+
+        </form>
+
+        <div class="text-center mt-4">
+
+            <span>
+                すでにアカウントをお持ちの方は
+            </span>
+
+            <a asp-action="Login">
+                ログイン
+            </a>
+
+        </div>
+
     </div>
 
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" class="form-control" autocomplete="new-password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">登録</button>
-    <a asp-action="Login" class="btn btn-link">ログイン</a>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

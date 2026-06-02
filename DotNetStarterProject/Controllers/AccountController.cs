@@ -34,7 +34,7 @@ public sealed class AccountController : Controller
 
         var user = new ApplicationUser
         {
-            UserName = model.Email,
+            UserName = model.UserName,
             Email = model.Email
         };
 
@@ -56,31 +56,31 @@ public sealed class AccountController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (!ModelState.IsValid)
+            return View(model);
+
+        var user = await _userManager.FindByEmailAsync(model.Email);
+
+        if (user == null)
         {
+            ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。");
             return View(model);
         }
 
         var result = await _signInManager.PasswordSignInAsync(
-            model.Email,
+            user.UserName!,
             model.Password,
             model.RememberMe,
-            lockoutOnFailure: false);
+            false);
 
         if (result.Succeeded)
         {
-            if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-            {
-                return LocalRedirect(model.ReturnUrl);
-            }
-
             return RedirectToAction("Index", "Home");
         }
 
-        ModelState.AddModelError(string.Empty, "メールアドレスまたはパスワードが正しくありません。");
+        ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。");
         return View(model);
     }
 
