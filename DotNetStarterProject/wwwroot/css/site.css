@@ -26,11 +26,12 @@ body {
     --primary-blue: #0061f2;
     --dark-blue: #1a2b48;
     --header-bg: #1a2b48;
-    --danger-1: #28a745;
-    --danger-2: #ffc107;
-    --danger-3: #fd7e14;
-    --danger-4: #dc3545;
-    --danger-5: #b02a37;
+    /* 色覚バリアフリー配色 */
+    --danger-1: #005aff;
+    --danger-2: #03af7a;
+    --danger-3: #fff100;
+    --danger-4: #f6aa00;
+    --danger-5: #ff4b00;
 }
 
 /* Navbar */
@@ -61,22 +62,27 @@ body {
 
 /* Badges */
 .badge-danger-level {
-    width: 24px;
-    height: 24px;
+    width: 48px;
+    height: 48px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     color: white;
     font-weight: bold;
-    font-size: 0.8rem;
+    font-size: 1.2rem;
+    border: 2px solid white;
+    box-shadow: 0 3px 8px rgba(0,0,0,.15);
 }
 
 .badge-1 { background-color: var(--danger-1); }
 .badge-2 { background-color: var(--danger-2); }
 .badge-3 { background-color: var(--danger-3); }
 .badge-4 { background-color: var(--danger-4); }
-.badge-5 { background-color: var(--danger-5); }
+.badge-5 {
+    background-color: var(--danger-5);
+    border: 3px solid #222;
+}
 
 .category-tag {
     border: 1px solid #dee2e6;
@@ -102,13 +108,13 @@ body {
 }
 
 .hero-title {
-    font-size: 3.5rem;
+    font-size: 4.5rem;
     font-weight: 800;
     margin-bottom: 1.5rem;
 }
 
 .hero-subtitle {
-    font-size: 1.5rem;
+    font-size: 2.5rem;
     margin-bottom: 2rem;
     font-weight: 400;
 }
@@ -270,11 +276,18 @@ footer.footer-custom {
 }
 
 .hero-container p {
-    color: rgba(255,255,255,0.9);
+    font-size: 1.8rem;
+    color: rgba(255,255,255,0.95);
 }
 
 .hero-container .shadow-lg {
     box-shadow: 0 20px 50px rgba(0,0,0,.4) !important;
+}
+
+.hero-title,
+.hero-subtitle,
+.hero-container p {
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
 }
 
 @media (max-width: 991px) {
