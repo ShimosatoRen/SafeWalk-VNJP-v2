@@ -89,12 +89,16 @@ body {
 
 /* Hero Section */
 .hero-container {
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1526232759583-26f173b4042c?q=80&w=2070&auto=format&fit=crop');
+    position: relative;
+    min-height: 85vh;
+    background-image: linear-gradient( rgba(0,0,0,0.55), rgba(0,0,0,0.55) ), url('/images/hero.jpg');
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
     color: white;
-    padding: 120px 0;
-    margin-bottom: 2rem;
+    padding: 80px 0;
 }
 
 .hero-title {
@@ -187,3 +191,120 @@ footer.footer-custom {
         border-radius: 10px;
         font-weight: 600;
     }
+
+.hero-section {
+    min-height: 85vh;
+    background-image: linear-gradient( rgba(0,0,0,0.55), rgba(0,0,0,0.55) ), url('/images/hero.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+}
+
+.hero-overlay {
+    width: 100%;
+}
+
+.hero-content {
+    max-width: 700px;
+    color: white;
+}
+
+    .hero-content h1 {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+
+    .hero-content h2 {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1.4;
+        margin-bottom: 2rem;
+    }
+
+    .hero-content p {
+        font-size: 1.4rem;
+        margin-bottom: 2rem;
+    }
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+
+@media (max-width: 768px) {
+
+    .hero-section {
+        min-height: 70vh;
+        text-align: center;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-content h2 {
+        font-size: 1.8rem;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+    }
+}
+
+.hero-title {
+    color: white;
+    font-weight: 800;
+}
+
+.hero-subtitle {
+    color: white;
+    font-weight: 700;
+}
+
+.hero-container p {
+    color: rgba(255,255,255,0.9);
+}
+
+.hero-container .shadow-lg {
+    box-shadow: 0 20px 50px rgba(0,0,0,.4) !important;
+}
+
+@media (max-width: 991px) {
+
+    .hero-container {
+        min-height: auto;
+        text-align: center;
+        padding: 60px 0;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+    }
+
+    .hero-subtitle {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .hero-title {
+        font-size: 2.4rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.6rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+    }
+}
