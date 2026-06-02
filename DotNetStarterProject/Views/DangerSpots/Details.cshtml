@@ -1,82 +1,198 @@
+@model DotNetStarterProject.Models.DangerSpot
 @{
     ViewData["Title"] = "危険地点詳細";
 }
 
 <div class="container py-5">
+    <!-- Back Button -->
     <div class="mb-4">
-        <a asp-action="Index" class="text-decoration-none small text-muted">
-            <i class="bi bi-arrow-left me-1"></i> 一覧に戻る
+        <a asp-action="Index" class="text-decoration-none d-inline-flex align-items-center text-muted transition-all hover-primary">
+            <i class="bi bi-arrow-left me-2 fs-5"></i>
+            <span class="fw-bold">一覧に戻る</span>
         </a>
     </div>
 
-    <div class="row g-4">
-        <!-- Left Column: Info -->
-        <div class="col-lg-7">
-            <div class="card border-0 shadow-sm h-100">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg overflow-hidden rounded-4">
+                <!-- Hero Image Section -->
+                <div class="position-relative" style="height: 450px;">
+                    @if (!string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <img src="@Model.ImagePath" class="w-100 h-100 object-fit-cover" alt="@Model.Title">
+                    }
+                    else
+                    {
+                        <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center flex-column text-muted">
+                            <i class="bi bi-image fs-1 mb-2"></i>
+                            <span class="fw-bold">画像が登録されていません</span>
+                        </div>
+                    }
+                    <div class="position-absolute bottom-0 start-0 w-100 p-4 p-md-5" style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            @{
+                                var badgeClass = Model.DangerLevel switch
+                                {
+                                    5 => "bg-danger",
+                                    4 => "bg-danger",
+                                    3 => "bg-warning",
+                                    2 => "bg-info",
+                                    _ => "bg-secondary"
+                                };
+                                var dangerLevelText = Model.DangerLevel switch
+                                {
+                                    5 => "通行回避推奨",
+                                    4 => "非常に危険",
+                                    3 => "危険",
+                                    2 => "注意",
+                                    _ => "軽微"
+                                };
+                            }
+                            <span class="badge @badgeClass px-3 py-2 rounded-pill fw-bold shadow-sm">
+                                危険レベル @Model.DangerLevel: @dangerLevelText
+                            </span>
+                        </div>
+                        <h1 class="text-white fw-black display-5 m-0 text-shadow">@Model.Title</h1>
+                    </div>
+                </div>
+
                 <div class="card-body p-4 p-md-5">
-                    <div class="d-flex justify-content-between align-items-start mb-4">
-                        <h1 class="fw-bold h2 m-0">横断が非常に困難</h1>
-                        <span class="badge bg-danger px-3 py-2 fw-bold">非常に危険</span>
-                    </div>
+                    <div class="row g-5">
+                        <!-- Main Info Column -->
+                        <div class="col-md-7">
+                            <section class="mb-5">
+                                <h5 class="fw-bold mb-4 d-flex align-items-center">
+                                    <i class="bi bi-info-circle-fill text-primary me-2"></i> 危険の詳細
+                                </h5>
+                                <p class="text-muted lh-lg fs-5">@Model.Description</p>
+                            </section>
 
-                    <div class="mb-5">
-                        <div class="row border-bottom py-3">
-                            <div class="col-sm-4 fw-bold text-muted small text-uppercase">カテゴリ</div>
-                            <div class="col-sm-8"><span class="category-tag text-danger border-danger">横断困難</span></div>
+                            <section>
+                                <h5 class="fw-bold mb-4 d-flex align-items-center">
+                                    <i class="bi bi-grid-fill text-primary me-2"></i> 基本情報
+                                </h5>
+                                <div class="list-group list-group-flush rounded-3 border">
+                                    <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                        <span class="text-muted fw-bold small text-uppercase">カテゴリ</span>
+                                        @{
+                                            var tagClass = Model.Category switch
+                                            {
+                                                "Crossing" => "text-danger border-danger bg-danger-soft",
+                                                "NoSidewalk" => "text-warning border-warning bg-warning-soft",
+                                                "HeavyTraffic" => "text-warning border-warning bg-warning-soft",
+                                                "Flood" => "text-info border-info bg-info-soft",
+                                                "NightRisk" => "text-secondary border-secondary bg-secondary-soft",
+                                                _ => "text-primary border-primary bg-primary-soft"
+                                            };
+                                            var (dummyClass, displayName) = Model.Category switch
+                                            {
+                                                "Crossing" => ("", "横断困難"),
+                                                "NoSidewalk" => ("", "歩道未整備"),
+                                                "HeavyTraffic" => ("", "バイク交通量過多"),
+                                                "Flood" => ("", "冠水エリア"),
+                                                "NightRisk" => ("", "夜間危険"),
+                                                "Construction" => ("", "工事中"),
+                                                "NoSignal" => ("", "信号機なし"),
+                                                _ => ("", Model.Category)
+                                            };
+                                        }
+                                        <span class="category-tag px-3 py-1 rounded-pill @tagClass">@displayName</span>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                        <span class="text-muted fw-bold small text-uppercase">登録日時</span>
+                                        <span class="fw-medium text-dark">@Model.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</span>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                        <span class="text-muted fw-bold small text-uppercase">投稿者</span>
+                                        <span class="fw-medium text-dark d-flex align-items-center">
+                                            <i class="bi bi-person-circle me-2 text-primary"></i>
+                                            @(Model.User?.UserName ?? "不明")
+                                        </span>
+                                    </div>
+                                </div>
+                            </section>
                         </div>
-                        <div class="row border-bottom py-3">
-                            <div class="col-sm-4 fw-bold text-muted small text-uppercase">危険レベル</div>
-                            <div class="col-sm-8 d-flex align-items-center">
-                                <span class="badge-danger-level badge-5 me-2">5</span>
-                                <span class="fw-bold text-danger">(非常に危険)</span>
-                            </div>
-                        </div>
-                        <div class="row border-bottom py-3">
-                            <div class="col-sm-4 fw-bold text-muted small text-uppercase">説明</div>
-                            <div class="col-sm-8 text-muted">信号がなく、車のスピードも速いため、横断するのが非常に困難です。特に夕方は車が多く注意が必要です。</div>
-                        </div>
-                        <div class="row border-bottom py-3">
-                            <div class="col-sm-4 fw-bold text-muted small text-uppercase">場所</div>
-                            <div class="col-sm-8 text-muted">ホーチミン市 1区 Nguyen Hue 通り付近</div>
-                        </div>
-                        <div class="row border-bottom py-3">
-                            <div class="col-sm-4 fw-bold text-muted small text-uppercase">登録日時</div>
-                            <div class="col-sm-8 text-muted">2024/05/20 14:30</div>
-                        </div>
-                        <div class="row border-bottom py-3">
-                            <div class="col-sm-4 fw-bold text-muted small text-uppercase">投稿者</div>
-                            <div class="col-sm-8 text-muted">Tanaka</div>
+
+                        <!-- Sidebar Column -->
+                        <div class="col-md-5">
+                            <section class="mb-5">
+                                <h5 class="fw-bold mb-4 d-flex align-items-center">
+                                    <i class="bi bi-geo-alt-fill text-danger me-2"></i> 位置情報
+                                </h5>
+                                <div class="card border shadow-sm rounded-4 overflow-hidden mb-3">
+                                    <div class="ratio ratio-16x9 bg-light d-flex align-items-center justify-content-center position-relative">
+                                        <div class="text-center z-1 p-3">
+                                            <i class="bi bi-pin-map-fill text-danger display-4 mb-2"></i>
+                                            <p class="small text-muted mb-0">緯度: @Model.Latitude<br>経度: @Model.Longitude</p>
+                                        </div>
+                                        <img src="https://api.placeholder.com/400/300?text=Map+Preview" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0 opacity-25" alt="Map">
+                                    </div>
+                                </div>
+                                <a href="https://www.google.com/maps/search/?api=1&query=@Model.Latitude,@Model.Longitude" target="_blank" class="btn btn-outline-dark w-100 py-3 rounded-pill fw-bold transition-all shadow-sm">
+                                    <i class="bi bi-box-arrow-up-right me-2"></i> Google Mapsで開く
+                                </a>
+                            </section>
+
+                            @if (User.Identity?.Name == Model.User?.UserName)
+                            {
+                                <section>
+                                    <h5 class="fw-bold mb-4 d-flex align-items-center">
+                                        <i class="bi bi-gear-wide-connected text-secondary me-2"></i> 管理操作
+                                    </h5>
+                                    <div class="d-grid gap-3">
+                                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary py-3 rounded-pill fw-bold shadow-sm">
+                                            <i class="bi bi-pencil-square me-2"></i> 投稿を編集する
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger py-3 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                            <i class="bi bi-trash3-fill me-2"></i> 投稿を削除する
+                                        </button>
+                                    </div>
+                                </section>
+                            }
                         </div>
                     </div>
-
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-secondary px-4 fw-bold">編集</button>
-                        <button class="btn btn-outline-danger px-4 fw-bold">削除</button>
-                        <a asp-action="Index" class="btn btn-dark px-4 fw-bold ms-auto">一覧に戻る</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column: Media -->
-        <div class="col-lg-5">
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body p-0 overflow-hidden rounded">
-                    <img src="https://images.unsplash.com/photo-1544006659-f0b21f04cb1d?q=80&w=2070&auto=format&fit=crop" class="img-fluid w-100" alt="Spot Image">
-                    <div class="p-2 d-flex gap-2 bg-light">
-                        <img src="https://images.unsplash.com/photo-1544006659-f0b21f04cb1d?q=80&w=2070&auto=format&fit=crop" class="img-thumbnail" style="width: 80px; height: 60px; object-fit: cover;">
-                        <img src="https://images.unsplash.com/photo-1526232759583-26f173b4042c?q=80&w=2070&auto=format&fit=crop" class="img-thumbnail" style="width: 80px; height: 60px; object-fit: cover;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card border-0 shadow-sm overflow-hidden" style="height: 300px;">
-                <div class="h-100 d-flex align-items-center justify-content-center bg-light text-muted flex-column">
-                    <i class="bi bi-map-fill fs-1 mb-2"></i>
-                    <span class="small fw-bold">マッププレビュー</span>
-                    <img src="https://api.placeholder.com/400/300?text=Map+Location" class="img-fluid position-absolute w-100 h-100" style="object-fit: cover; opacity: 0.5;" alt="Map">
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger d-flex align-items-center">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> 削除の確認
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="m-0 text-muted fs-5">
+                    この投稿「<span class="fw-bold text-dark">@Model.Title</span>」を完全に削除してもよろしいですか？<br>
+                    <small class="text-danger">*この操作は取り消せません。</small>
+                </p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light px-4 py-2 rounded-pill fw-bold" data-bs-dismiss="modal">キャンセル</button>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger px-4 py-2 rounded-pill fw-bold shadow-sm">削除を確定する</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-black { font-weight: 900; }
+    .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    .transition-all { transition: all 0.3s ease; }
+    .hover-primary:hover { color: var(--bs-primary) !important; transform: translateX(-5px); }
+    .bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+    .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+    .bg-info-soft { background-color: rgba(13, 202, 240, 0.1); }
+    .bg-secondary-soft { background-color: rgba(108, 117, 125, 0.1); }
+    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+    .category-tag { border: 1px solid transparent; font-size: 0.85rem; font-weight: 700; }
+</style>

@@ -10,4 +10,6 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         : base(options)
     {
     }
+
+    public DbSet<DangerSpot> DangerSpots => Set<DangerSpot>();
 }
