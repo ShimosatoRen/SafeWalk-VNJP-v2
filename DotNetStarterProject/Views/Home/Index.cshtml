@@ -1,3 +1,4 @@
+@using DotNetStarterProject.Helpers
 @model IEnumerable<DotNetStarterProject.Models.DangerSpot>
 @{
     ViewData["Title"] = "ホーム";
@@ -79,10 +80,11 @@
             <div id="homeMap" style="height: 500px;"></div>
             <div class="card-footer bg-white p-3 border-0">
                 <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    <span class="small text-muted"><i class="bi bi-circle-fill text-danger me-1"></i> 横断困難</span>
-                    <span class="small text-muted"><i class="bi bi-circle-fill text-warning me-1"></i> 歩道未整備</span>
-                    <span class="small text-muted"><i class="bi bi-circle-fill text-info me-1"></i> 冠水エリア</span>
-                    <span class="small text-muted"><i class="bi bi-circle-fill text-primary me-1"></i> その他</span>
+                    <span class="small text-muted"><i class="bi bi-circle-fill text-info me-1"></i> 軽微 (0-1件)</span>
+                    <span class="small text-muted"><i class="bi bi-circle-fill text-success me-1"></i> 注意 (2件)</span>
+                    <span class="small text-muted"><i class="bi bi-circle-fill text-warning me-1"></i> 危険 (3-4件)</span>
+                    <span class="small text-muted"><i class="bi bi-circle-fill text-warning me-1" style="color: orange !important;"></i> 非常に危険 (5-6件)</span>
+                    <span class="small text-muted"><i class="bi bi-circle-fill text-danger me-1"></i> 回避推奨 (7件〜)</span>
                 </div>
             </div>
         </div>
@@ -135,29 +137,34 @@
 
     <div class="row">
         <div class="col-lg-6 mb-4">
-            <h5 class="fw-bold mb-4 border-start border-primary border-4 ps-3">危険レベル</h5>
+            <h5 class="fw-bold mb-4 border-start border-primary border-4 ps-3">危険レベル判定基準</h5>
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
                     <div class="row text-center">
                         <div class="col">
-                            <span class="badge-danger-level badge-1 mb-2"><i class="bi bi-info-lg"></i></span>
+                            <span class="badge-danger-level badge-1 mb-2" style="background-color: #007bff !important;"><i class="bi bi-info-lg"></i></span>
                             <div class="small fw-bold">軽微</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">0-1件</div>
                         </div>
                         <div class="col">
-                            <span class="badge-danger-level badge-2 mb-2"><i class="bi bi-exclamation-lg"></i></span>
+                            <span class="badge-danger-level badge-2 mb-2" style="background-color: #28a745 !important;"><i class="bi bi-exclamation-lg"></i></span>
                             <div class="small fw-bold">注意</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">2件</div>
                         </div>
                         <div class="col">
-                            <span class="badge-danger-level badge-3 mb-2"><i class="bi bi-signpost-split"></i></span>
+                            <span class="badge-danger-level badge-3 mb-2" style="background-color: #ffc107 !important;"><i class="bi bi-signpost-split"></i></span>
                             <div class="small fw-bold">危険</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">3-4件</div>
                         </div>
                         <div class="col">
-                            <span class="badge-danger-level badge-4 mb-2"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                            <span class="badge-danger-level badge-4 mb-2" style="background-color: #fd7e14 !important;"><i class="bi bi-exclamation-triangle-fill"></i></span>
                             <div class="small fw-bold">非常に危険</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">5-6件</div>
                         </div>
                         <div class="col">
-                            <span class="badge-danger-level badge-5 mb-2"><i class="bi bi-x-octagon-fill"></i></span>
+                            <span class="badge-danger-level badge-5 mb-2" style="background-color: #dc3545 !important;"><i class="bi bi-x-octagon-fill"></i></span>
                             <div class="small fw-bold">回避推奨</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">7件〜</div>
                         </div>
                     </div>
                 </div>
@@ -201,21 +208,18 @@
             s.Category, 
             s.Latitude, 
             s.Longitude,
-            s.DangerLevel,
+            s.ReportCount,
+            DangerLevelText = DangerLevelHelper.GetDangerLevel(s.ReportCount),
+            DangerColor = DangerLevelHelper.GetHexColor(s.ReportCount),
             DetailsUrl = Url.Action("Details", "DangerSpots", new { id = s.Id })
         })));
 
         if (spots.length > 0) {
             const markers = [];
             spots.forEach(spot => {
-                let color = '#0d6efd'; // Default primary
-                if (spot.category === 'Crossing') color = '#dc3545'; // Danger
-                if (spot.category === 'NoSidewalk' || spot.category === 'HeavyTraffic') color = '#ffc107'; // Warning
-                if (spot.category === 'Flood') color = '#0dcaf0'; // Info
-
                 const marker = L.circleMarker([spot.latitude, spot.longitude], {
-                    radius: 8,
-                    fillColor: color,
+                    radius: 8 + (Math.min(spot.reportCount, 10) * 1.2),
+                    fillColor: spot.dangerColor,
                     color: "#fff",
                     weight: 2,
                     opacity: 1,
@@ -225,7 +229,7 @@
                 marker.bindPopup(`
                     <div class="p-1">
                         <h6 class="fw-bold mb-1">${spot.title}</h6>
-                        <p class="small text-muted mb-2">カテゴリ: ${spot.category}</p>
+                        <p class="small text-muted mb-2">判定: <span class="fw-bold" style="color:${spot.dangerColor}">${spot.dangerLevelText}</span> (${spot.reportCount}件)</p>
                         <a href="${spot.detailsUrl}" class="btn btn-primary btn-sm w-100 text-white">詳細を見る</a>
                     </div>
                 `);

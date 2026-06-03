@@ -1,3 +1,4 @@
+@using DotNetStarterProject.Helpers
 @model DotNetStarterProject.Models.DangerSpot
 @{
     ViewData["Title"] = "危険地点詳細";
@@ -30,26 +31,8 @@
                     }
                     <div class="position-absolute bottom-0 start-0 w-100 p-4 p-md-5" style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
                         <div class="d-flex align-items-center gap-3 mb-2">
-                            @{
-                                var badgeClass = Model.DangerLevel switch
-                                {
-                                    5 => "bg-danger",
-                                    4 => "bg-danger",
-                                    3 => "bg-warning",
-                                    2 => "bg-info",
-                                    _ => "bg-secondary"
-                                };
-                                var dangerLevelText = Model.DangerLevel switch
-                                {
-                                    5 => "通行回避推奨",
-                                    4 => "非常に危険",
-                                    3 => "危険",
-                                    2 => "注意",
-                                    _ => "軽微"
-                                };
-                            }
-                            <span class="badge @badgeClass px-3 py-2 rounded-pill fw-bold shadow-sm">
-                                危険レベル @Model.DangerLevel: @dangerLevelText
+                            <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(Model.ReportCount) px-3 py-2 rounded-pill fw-bold shadow-sm">
+                                判定: @DangerLevelHelper.GetDangerLevel(Model.ReportCount) (@Model.ReportCount 件の報告)
                             </span>
                         </div>
                         <h1 class="text-white fw-black display-5 m-0 text-shadow">@Model.Title</h1>

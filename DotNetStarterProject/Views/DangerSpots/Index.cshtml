@@ -1,6 +1,8 @@
+@using DotNetStarterProject.Helpers
 @model IEnumerable<DotNetStarterProject.Models.DangerSpot>
 @{
     ViewData["Title"] = "危険地点一覧";
+// ... (omitting current vars for brevity in planning, but tool requires exact context)
     var currentCategory = ViewData["CurrentCategory"] as string;
     var currentDangerLevel = ViewData["CurrentDangerLevel"] as int?;
     var currentFilter = ViewData["CurrentFilter"] as string;
@@ -100,7 +102,10 @@
                                 <span class="category-tag @tagClass">@displayName</span>
                             </td>
                             <td class="text-center">
-                                <span class="badge-danger-level badge-@item.DangerLevel">@item.DangerLevel</span>
+                                <span class="badge rounded-pill px-3 py-2 fw-bold bg-@DangerLevelHelper.GetBootstrapClass(item.ReportCount)" style="min-width: 80px;">
+                                    @DangerLevelHelper.GetDangerLevel(item.ReportCount)
+                                </span>
+                                <div class="text-muted" style="font-size: 0.7rem;">(@item.ReportCount 件の投稿)</div>
                             </td>
                             <td class="small text-muted">@item.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
                             <td class="text-end pe-4">

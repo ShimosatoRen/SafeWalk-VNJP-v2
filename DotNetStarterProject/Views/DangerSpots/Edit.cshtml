@@ -24,33 +24,19 @@
                             <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label asp-for="Category" class="form-label fw-bold small text-muted">カテゴリ</label>
-                                <select asp-for="Category" class="form-select border-0 bg-light p-3">
-                                    <option value="">カテゴリを選択</option>
-                                    <option value="Crossing">横断困難</option>
-                                    <option value="NoSidewalk">歩道未整備</option>
-                                    <option value="HeavyTraffic">バイク交通量過多</option>
-                                    <option value="Flood">冠水エリア</option>
-                                    <option value="NightRisk">夜間危険</option>
-                                    <option value="Construction">工事中</option>
-                                    <option value="NoSignal">信号機なし</option>
-                                </select>
-                                <span asp-validation-for="Category" class="text-danger small"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="DangerLevel" class="form-label fw-bold small text-muted">危険レベル</label>
-                                <select asp-for="DangerLevel" class="form-select border-0 bg-light p-3">
-                                    <option value="">危険レベルを選択</option>
-                                    <option value="1">1 (軽微)</option>
-                                    <option value="2">2 (注意)</option>
-                                    <option value="3">3 (危険)</option>
-                                    <option value="4">4 (非常に危険)</option>
-                                    <option value="5">5 (回避推奨)</option>
-                                </select>
-                                <span asp-validation-for="DangerLevel" class="text-danger small"></span>
-                            </div>
+                        <div class="mb-4">
+                            <label asp-for="Category" class="form-label fw-bold small text-muted">カテゴリ</label>
+                            <select asp-for="Category" class="form-select border-0 bg-light p-3">
+                                <option value="">カテゴリを選択</option>
+                                <option value="Crossing">横断困難</option>
+                                <option value="NoSidewalk">歩道未整備</option>
+                                <option value="HeavyTraffic">バイク交通量過多</option>
+                                <option value="Flood">冠水エリア</option>
+                                <option value="NightRisk">夜間危険</option>
+                                <option value="Construction">工事中</option>
+                                <option value="NoSignal">信号機なし</option>
+                            </select>
+                            <span asp-validation-for="Category" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-4">

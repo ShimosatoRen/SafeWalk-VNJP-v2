@@ -1,3 +1,4 @@
+@using DotNetStarterProject.Helpers
 @model IEnumerable<DotNetStarterProject.Models.DangerSpot>
 @{
     ViewData["Title"] = "危険地点マップ";
@@ -13,23 +14,27 @@
             </div>
             <div class="p-4 flex-grow-1 overflow-auto">
                 <div class="mb-4">
-                    <h6 class="fw-bold small text-muted text-uppercase mb-3">凡例</h6>
+                    <h6 class="fw-bold small text-muted text-uppercase mb-3">凡例 (報告件数による判定)</h6>
                     <div class="d-grid gap-2">
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-danger rounded-circle p-2 me-2" style="width: 10px; height: 10px;"></span>
-                            <span class="small">横断困難</span>
+                            <span class="badge rounded-circle p-2 me-2" style="width: 12px; height: 12px; background-color: #007bff;"></span>
+                            <span class="small">軽微 (0-1件)</span>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-warning rounded-circle p-2 me-2" style="width: 10px; height: 10px;"></span>
-                            <span class="small">歩道未整備・交通量過多</span>
+                            <span class="badge rounded-circle p-2 me-2" style="width: 12px; height: 12px; background-color: #28a745;"></span>
+                            <span class="small">注意 (2件)</span>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-info rounded-circle p-2 me-2" style="width: 10px; height: 10px;"></span>
-                            <span class="small">冠水エリア</span>
+                            <span class="badge rounded-circle p-2 me-2" style="width: 12px; height: 12px; background-color: #ffc107;"></span>
+                            <span class="small">危険 (3-4件)</span>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-primary rounded-circle p-2 me-2" style="width: 10px; height: 10px;"></span>
-                            <span class="small">その他</span>
+                            <span class="badge rounded-circle p-2 me-2" style="width: 12px; height: 12px; background-color: #fd7e14;"></span>
+                            <span class="small">非常に危険 (5-6件)</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge rounded-circle p-2 me-2" style="width: 12px; height: 12px; background-color: #dc3545;"></span>
+                            <span class="small">回避推奨 (7件〜)</span>
                         </div>
                     </div>
                 </div>
@@ -87,7 +92,9 @@
             s.Category, 
             s.Latitude, 
             s.Longitude,
-            s.DangerLevel,
+            s.ReportCount,
+            DangerLevelText = DangerLevelHelper.GetDangerLevel(s.ReportCount),
+            DangerColor = DangerLevelHelper.GetHexColor(s.ReportCount),
             DetailsUrl = Url.Action("Details", "DangerSpots", new { id = s.Id })
         })));
 
@@ -95,14 +102,9 @@
 
         if (spots.length > 0) {
             spots.forEach(spot => {
-                let color = '#0d6efd'; // Default primary
-                if (spot.category === 'Crossing') color = '#dc3545'; // Danger
-                if (spot.category === 'NoSidewalk' || spot.category === 'HeavyTraffic') color = '#ffc107'; // Warning
-                if (spot.category === 'Flood') color = '#0dcaf0'; // Info
-
                 const marker = L.circleMarker([spot.latitude, spot.longitude], {
-                    radius: 10,
-                    fillColor: color,
+                    radius: 10 + (Math.min(spot.reportCount, 10) * 1.2),
+                    fillColor: spot.dangerColor,
                     color: "#fff",
                     weight: 2,
                     opacity: 1,
@@ -112,7 +114,7 @@
                 marker.bindPopup(`
                     <div class="p-2" style="min-width: 200px;">
                         <h6 class="fw-bold mb-1">${spot.title}</h6>
-                        <p class="small text-muted mb-2">カテゴリ: ${spot.category}<br>危険レベル: ${spot.dangerLevel}</p>
+                        <p class="small text-muted mb-2">カテゴリ: ${spot.category}<br>判定: <span class="fw-bold" style="color:${spot.dangerColor}">${spot.dangerLevelText}</span> (${spot.reportCount}件)</p>
                         <a href="${spot.detailsUrl}" class="btn btn-primary btn-sm w-100 text-white fw-bold">詳細を見る</a>
                     </div>
                 `);
@@ -135,5 +137,4 @@
     /* Ensure the map fills the available height correctly */
     footer { display: none; }
     #fullMap { background: #f8f9fa; }
-    .category-dot { width: 12px; height: 12px; display: inline-block; border-radius: 50%; }
 </style>
