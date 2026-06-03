@@ -1,6 +1,6 @@
 @model DotNetStarterProject.Models.DangerSpot
 @{
-    ViewData["Title"] = "新規投稿";
+    ViewData["Title"] = "投稿の編集";
 }
 
 <div class="container py-5">
@@ -8,24 +8,16 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom p-4">
-                    <h1 class="fw-bold h3 m-0">新規投稿</h1>
+                    <h1 class="fw-bold h3 m-0">投稿の編集</h1>
                 </div>
                 <div class="card-body p-4">
-                    <!-- Privacy Warning -->
-                    <div class="alert alert-warning border-0 shadow-sm mb-4 d-flex align-items-start">
-                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3 mt-1"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">プライバシーに関するご注意</h6>
-                            <p class="small mb-0 text-muted">
-                                投稿された危険地点（タイトル、説明、写真、位置情報）はログインしている全ユーザーに公開されます。
-                                自宅の特定や個人のプライバシー侵害につながる情報の投稿には十分ご注意ください。
-                            </p>
-                        </div>
-                    </div>
-
-                    <form asp-action="Create" enctype="multipart/form-data">
+                    <form asp-action="Edit" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
-                        
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="CreatedAt" />
+                        <input type="hidden" asp-for="ImagePath" />
+
                         <div class="mb-4">
                             <label asp-for="Title" class="form-label fw-bold small text-muted">タイトル</label>
                             <input asp-for="Title" class="form-control border-0 bg-light p-3" placeholder="タイトルを入力">
@@ -88,11 +80,19 @@
                         <div class="mb-5">
                             <label class="form-label fw-bold small text-muted">画像</label>
                             <input type="file" name="imageFile" id="imageInput" class="form-control border-0 bg-light p-3" accept="image/*">
-                            <div class="form-text small mb-3">危険な場所の状況がわかる画像をアップロードしてください。</div>
+                            <div class="form-text small mb-3">新しい画像を選択すると現在の画像が上書きされます。</div>
                             
+                            @if (!string.IsNullOrEmpty(Model.ImagePath))
+                            {
+                                <div class="mb-3">
+                                    <p class="small fw-bold text-muted mb-2">現在の画像:</p>
+                                    <img src="@Model.ImagePath" alt="Current Image" class="img-thumbnail" style="max-height: 200px;">
+                                </div>
+                            }
+
                             <!-- Image Preview Area -->
                             <div id="imagePreviewContainer" class="d-none">
-                                <p class="small fw-bold text-muted mb-2">プレビュー:</p>
+                                <p class="small fw-bold text-muted mb-2">新しい画像のプレビュー:</p>
                                 <div class="position-relative d-inline-block">
                                     <img id="imagePreview" src="#" alt="Preview" class="img-thumbnail" style="max-height: 200px; object-fit: contain;">
                                     <button type="button" id="removeImage" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle" title="画像を削除">
@@ -104,7 +104,7 @@
 
                         <div class="d-flex justify-content-end gap-3">
                             <a asp-action="Index" class="btn btn-light px-4 py-3 fw-bold">キャンセル</a>
-                            <button type="submit" class="btn btn-primary px-5 py-3 fw-bold shadow-sm">投稿する</button>
+                            <button type="submit" class="btn btn-primary px-5 py-3 fw-bold shadow-sm">保存する</button>
                         </div>
                     </form>
                 </div>
@@ -133,18 +133,18 @@
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     
     <script>
-        // Initialize Map
-        const defaultLat = 35.6812; // Tokyo Station
-        const defaultLng = 139.7671;
+        // Initialize Map with existing values or default
+        const initialLat = @Model.Latitude != 0 ? @Model.Latitude : 35.6812;
+        const initialLng = @Model.Longitude != 0 ? @Model.Longitude : 139.7671;
         
-        const map = L.map('map').setView([defaultLat, defaultLng], 13);
+        const map = L.map('map').setView([initialLat, initialLng], 15);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
         // Marker logic
-        let marker = L.marker([defaultLat, defaultLng], {
+        let marker = L.marker([initialLat, initialLng], {
             draggable: true
         }).addTo(map);
 
@@ -163,7 +163,7 @@
             updateInputs(e.latlng.lat, e.latlng.lng);
         });
 
-        // Search logic (Japanese search supported by Nominatim)
+        // Search logic
         const geocoder = L.Control.geocoder({
             defaultMarkGeocode: false,
             placeholder: "場所を検索...",

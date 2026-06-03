@@ -104,7 +104,16 @@
                             </td>
                             <td class="small text-muted">@item.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
                             <td class="text-end pe-4">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">詳細</a>
+                                <div class="btn-group">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-start-pill px-3">詳細</a>
+                                    @if (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == item.UserId)
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning px-3">編集</a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-end-pill px-3" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="@item.Id" data-title="@item.Title">
+                                            削除
+                                        </button>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }
@@ -113,3 +122,41 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="deleteModalLabel">削除の確認</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="mb-0 text-muted">「<span id="deleteItemTitle" class="fw-bold text-dark"></span>」を削除してもよろしいですか？この操作は取り消せません。</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light px-4 fw-bold" data-bs-dismiss="modal">キャンセル</button>
+                <form id="deleteForm" asp-action="Delete" method="post">
+                    <input type="hidden" name="id" id="deleteItemId" value="" />
+                    <button type="submit" class="btn btn-danger px-4 fw-bold">削除する</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const title = button.getAttribute('data-title');
+                
+                document.getElementById('deleteItemId').value = id;
+                document.getElementById('deleteItemTitle').textContent = title;
+            });
+        }
+    </script>
+}

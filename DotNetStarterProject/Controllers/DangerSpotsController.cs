@@ -127,6 +127,91 @@ public class DangerSpotsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // GET: DangerSpots/Edit/5
+    public async Task<IActionResult> Edit(long? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var dangerSpot = await _context.DangerSpots.FindAsync(id);
+        if (dangerSpot == null)
+        {
+            return NotFound();
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null || dangerSpot.UserId != user.Id)
+        {
+            return Forbid();
+        }
+
+        return View(dangerSpot);
+    }
+
+    // POST: DangerSpots/Edit/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(long id, [Bind("Id,Title,Description,Category,DangerLevel,Latitude,Longitude,UserId,CreatedAt,ImagePath")] DangerSpot dangerSpot, IFormFile? imageFile)
+    {
+        if (id != dangerSpot.Id)
+        {
+            return NotFound();
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null || dangerSpot.UserId != user.Id)
+        {
+            return Forbid();
+        }
+
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageFile.FileName;
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+
+            // Optionally delete old image here
+            dangerSpot.ImagePath = "/uploads/" + uniqueFileName;
+        }
+
+        if (string.IsNullOrEmpty(dangerSpot.Title) || string.IsNullOrEmpty(dangerSpot.Description) || string.IsNullOrEmpty(dangerSpot.Category))
+        {
+            ModelState.AddModelError("", "Title, Description, and Category are required.");
+            return View(dangerSpot);
+        }
+
+        try
+        {
+            dangerSpot.UpdatedAt = DateTime.UtcNow;
+            _context.Update(dangerSpot);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!_context.DangerSpots.Any(e => e.Id == dangerSpot.Id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
     // POST: DangerSpots/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
