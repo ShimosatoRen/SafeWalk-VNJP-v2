@@ -6,9 +6,9 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom p-4">
-                    <h1 class="fw-bold h3 m-0">投稿の編集</h1>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-bottom-0 p-4 pb-0">
+                    <h2 class="fw-bold h3 m-0">投稿を編集する</h2>
                 </div>
                 <div class="card-body p-4">
                     <form asp-action="Edit" enctype="multipart/form-data">
@@ -18,15 +18,14 @@
                         <input type="hidden" asp-for="CreatedAt" />
                         <input type="hidden" asp-for="ImagePath" />
 
-                        <div class="mb-4">
-                            <label asp-for="Title" class="form-label fw-bold small text-muted">タイトル</label>
-                            <input asp-for="Title" class="form-control border-0 bg-light p-3" placeholder="タイトルを入力">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Title" class="form-control border-0 bg-light" placeholder="タイトルを入力">
+                            <label asp-for="Title" class="text-muted">タイトル</label>
                             <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
-                        <div class="mb-4">
-                            <label asp-for="Category" class="form-label fw-bold small text-muted">カテゴリ</label>
-                            <select asp-for="Category" class="form-select border-0 bg-light p-3">
+                        <div class="form-floating mb-3">
+                            <select asp-for="Category" class="form-select border-0 bg-light">
                                 <option value="">カテゴリを選択</option>
                                 <option value="Crossing">横断困難</option>
                                 <option value="NoSidewalk">歩道未整備</option>
@@ -36,61 +35,69 @@
                                 <option value="Construction">工事中</option>
                                 <option value="NoSignal">信号機なし</option>
                             </select>
+                            <label asp-for="Category" class="text-muted">カテゴリ</label>
                             <span asp-validation-for="Category" class="text-danger small"></span>
                         </div>
 
-                        <div class="mb-4">
-                            <label asp-for="Description" class="form-label fw-bold small text-muted">説明</label>
-                            <textarea asp-for="Description" class="form-control border-0 bg-light p-3" rows="4" placeholder="危険内容の詳細を入力してください"></textarea>
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Description" class="form-control border-0 bg-light" placeholder="詳細を入力" style="height: 120px"></textarea>
+                            <label asp-for="Description" class="text-muted">詳細な状況</label>
                             <span asp-validation-for="Description" class="text-danger small"></span>
                         </div>
 
-                        <div class="row mb-4">
+                        <!-- Location Inputs -->
+                        <h6 class="fw-bold mb-3 mt-4 text-muted"><i class="bi bi-geo-alt-fill me-2"></i> 位置情報</h6>
+                        <div class="row g-2 mb-4">
                             <div class="col-md-5">
-                                <label asp-for="Latitude" class="form-label fw-bold small text-muted">緯度</label>
-                                <input asp-for="Latitude" class="form-control border-0 bg-light p-3" placeholder="例) 10.7769">
-                                <span asp-validation-for="Latitude" class="text-danger small"></span>
+                                <div class="form-floating">
+                                    <input asp-for="Latitude" class="form-control border-0 bg-light" placeholder="緯度">
+                                    <label asp-for="Latitude" class="text-muted">緯度</label>
+                                </div>
                             </div>
                             <div class="col-md-5">
-                                <label asp-for="Longitude" class="form-label fw-bold small text-muted">経度</label>
-                                <input asp-for="Longitude" class="form-control border-0 bg-light p-3" placeholder="例) 106.7009">
-                                <span asp-validation-for="Longitude" class="text-danger small"></span>
+                                <div class="form-floating">
+                                    <input asp-for="Longitude" class="form-control border-0 bg-light" placeholder="経度">
+                                    <label asp-for="Longitude" class="text-muted">経度</label>
+                                </div>
                             </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <button type="button" class="btn btn-outline-primary w-100 p-3" title="現在地を取得" id="getLocation">
-                                    <i class="bi bi-geo-alt"></i>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-outline-primary h-100 w-100" title="現在地を取得" id="getLocation">
+                                    <i class="bi bi-crosshair"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <div class="mb-5">
-                            <label class="form-label fw-bold small text-muted">画像</label>
-                            <input type="file" name="imageFile" id="imageInput" class="form-control border-0 bg-light p-3" accept="image/*">
-                            <div class="form-text small mb-3">新しい画像を選択すると現在の画像が上書きされます。</div>
-                            
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted mb-2">現場の写真</label>
                             @if (!string.IsNullOrEmpty(Model.ImagePath))
                             {
                                 <div class="mb-3">
-                                    <p class="small fw-bold text-muted mb-2">現在の画像:</p>
-                                    <img src="@Model.ImagePath" alt="Current Image" class="img-thumbnail" style="max-height: 200px;">
+                                    <p class="small text-muted mb-2">現在の画像:</p>
+                                    <img src="@Model.ImagePath" alt="Current Image" class="img-thumbnail rounded-3" style="max-height: 150px;">
                                 </div>
                             }
-
+                            <div class="input-group">
+                                <input type="file" name="imageFile" id="imageInput" class="form-control bg-light border-0 p-3" accept="image/*">
+                            </div>
+                            <div class="form-text small mt-1">新しい画像を選択すると現在の画像が上書きされます。</div>
+                            
                             <!-- Image Preview Area -->
-                            <div id="imagePreviewContainer" class="d-none">
+                            <div id="imagePreviewContainer" class="d-none mt-3">
                                 <p class="small fw-bold text-muted mb-2">新しい画像のプレビュー:</p>
-                                <div class="position-relative d-inline-block">
-                                    <img id="imagePreview" src="#" alt="Preview" class="img-thumbnail" style="max-height: 200px; object-fit: contain;">
-                                    <button type="button" id="removeImage" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle" title="画像を削除">
+                                <div class="position-relative d-inline-block rounded-4 overflow-hidden border shadow-sm">
+                                    <img id="imagePreview" src="#" alt="Preview" class="img-fluid" style="max-height: 200px;">
+                                    <button type="button" id="removeImage" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle" title="画像を削除">
                                         <i class="bi bi-x"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-3">
-                            <a asp-action="Index" class="btn btn-light px-4 py-3 fw-bold">キャンセル</a>
-                            <button type="submit" class="btn btn-primary px-5 py-3 fw-bold shadow-sm">保存する</button>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
+                            <a asp-action="Index" class="btn btn-light px-4 py-3 fw-bold rounded-pill">キャンセル</a>
+                            <button type="submit" class="btn btn-primary px-5 py-3 fw-bold rounded-pill shadow">
+                                <i class="bi bi-check-lg me-2"></i> 保存する
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -98,14 +105,11 @@
             
             <!-- Leaflet Map -->
             <div class="mt-4">
-                <div class="card border-0 shadow-sm overflow-hidden">
-                    <div class="card-header bg-white border-bottom p-3">
-                        <h5 class="m-0 small fw-bold text-muted"><i class="bi bi-map me-2"></i>マップから場所を選択</h5>
+                <div class="card border-0 shadow-sm overflow-hidden rounded-4">
+                    <div class="card-header bg-white border-0 p-3 px-4">
+                        <h5 class="m-0 small fw-bold text-muted"><i class="bi bi-map me-2"></i>地図から場所を選択</h5>
                     </div>
                     <div id="map" style="height: 400px;"></div>
-                    <div class="card-footer bg-white border-top p-2 text-center">
-                        <small class="text-muted">地図をクリックするか、マーカーをドラッグして位置を調整できます。</small>
-                    </div>
                 </div>
             </div>
         </div>

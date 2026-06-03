@@ -4,4 +4,5 @@ namespace DotNetStarterProject.Models;
 
 public sealed class ApplicationUser : IdentityUser
 {
+    public DateTime? AdFreeUntil { get; set; }
 }

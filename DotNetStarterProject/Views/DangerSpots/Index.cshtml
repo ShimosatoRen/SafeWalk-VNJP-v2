@@ -57,76 +57,91 @@
         </div>
     </div>
 
-    <!-- Data Table -->
-    <div class="card border-0 shadow-sm overflow-hidden">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="ps-4 border-0 py-3 text-muted small text-uppercase fw-bold" style="width: 80px;">ID</th>
-                        <th class="border-0 py-3 text-muted small text-uppercase fw-bold">タイトル</th>
-                        <th class="border-0 py-3 text-muted small text-uppercase fw-bold">カテゴリ</th>
-                        <th class="border-0 py-3 text-muted small text-uppercase fw-bold text-center">危険レベル</th>
-                        <th class="border-0 py-3 text-muted small text-uppercase fw-bold">登録日時</th>
-                        <th class="border-0 py-3 text-muted small text-uppercase fw-bold text-end pe-4">操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.Any())
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                登録された危険地点がありません。
-                            </td>
-                        </tr>
-                    }
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="ps-4 fw-bold text-muted">@item.Id</td>
-                            <td class="fw-bold">@item.Title</td>
-                            <td>
-                                @{
-                                    var (tagClass, displayName) = item.Category switch
-                                    {
-                                        "Crossing" => ("text-danger border-danger", "横断困難"),
-                                        "NoSidewalk" => ("text-warning border-warning", "歩道未整備"),
-                                        "HeavyTraffic" => ("text-warning border-warning", "バイク交通量過多"),
-                                        "Flood" => ("text-info border-info", "冠水エリア"),
-                                        "NightRisk" => ("text-secondary border-secondary", "夜間危険"),
-                                        "Construction" => ("text-primary border-primary", "工事中"),
-                                        "NoSignal" => ("text-primary border-primary", "信号機なし"),
-                                        _ => ("text-primary border-primary", item.Category)
-                                    };
-                                }
-                                <span class="category-tag @tagClass">@displayName</span>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge rounded-pill px-3 py-2 fw-bold bg-@DangerLevelHelper.GetBootstrapClass(item.ReportCount)" style="min-width: 80px;">
-                                    @DangerLevelHelper.GetDangerLevel(item.ReportCount)
-                                </span>
-                                <div class="text-muted" style="font-size: 0.7rem;">(@item.ReportCount 件の投稿)</div>
-                            </td>
-                            <td class="small text-muted">@item.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
-                            <td class="text-end pe-4">
-                                <div class="btn-group">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-start-pill px-3">詳細</a>
-                                    @if (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == item.UserId)
-                                    {
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning px-3">編集</a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-end-pill px-3" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="@item.Id" data-title="@item.Title">
-                                            削除
-                                        </button>
-                                    }
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+    <!-- Data Cards -->
+    <div class="row g-4">
+        @if (!Model.Any())
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm py-5 text-center">
+                    <div class="card-body">
+                        <i class="bi bi-geo-fill display-1 text-light mb-4"></i>
+                        <h4 class="text-muted">登録された危険地点がありません。</h4>
+                        <p class="text-muted mb-4">あなたの周りの危険な場所を最初の投稿として登録しましょう！</p>
+                        <a asp-action="Create" class="btn btn-primary px-4 fw-bold shadow-sm">
+                            <i class="bi bi-plus-lg me-1"></i> 新規投稿する
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-all hover-lift">
+                    <div class="position-relative" style="height: 200px;">
+                        @if (!string.IsNullOrEmpty(item.ImagePath))
+                        {
+                            <img src="@item.ImagePath" class="w-100 h-100 object-fit-cover" alt="@item.Title">
+                        }
+                        else
+                        {
+                            <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center text-muted">
+                                <i class="bi bi-image fs-1 opacity-25"></i>
+                            </div>
+                        }
+                        <div class="position-absolute top-0 end-0 p-3">
+                            <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(item.ReportCount) shadow-sm px-3 py-2 rounded-pill fw-bold">
+                                @DangerLevelHelper.GetDangerLevel(item.ReportCount)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            @{
+                                var (tagClass, displayName, icon) = item.Category switch
+                                {
+                                    "Crossing" => ("text-danger", "横断困難", "bi-signpost-2"),
+                                    "NoSidewalk" => ("text-warning", "歩道未整備", "bi-hammer"),
+                                    "HeavyTraffic" => ("text-warning", "バイク交通量過多", "bi-bicycle"),
+                                    "Flood" => ("text-info", "冠水エリア", "bi-water"),
+                                    "NightRisk" => ("text-secondary", "夜間危険", "bi-moon-stars"),
+                                    "Construction" => ("text-primary", "工事中", "bi-cone-striped"),
+                                    "NoSignal" => ("text-primary", "信号機なし", "bi-traffic-light"),
+                                    _ => ("text-primary", item.Category, "bi-geo-alt")
+                                };
+                            }
+                            <span class="category-tag @tagClass">
+                                <i class="bi @icon"></i> @displayName
+                            </span>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i>@item.CreatedAt.ToLocalTime().ToString("MM/dd HH:mm")</small>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">@item.Title</h5>
+                        <p class="card-text text-muted small mb-4 line-clamp-2">@item.Description</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle text-primary me-2"></i>
+                                <small class="fw-bold text-muted">@(item.User?.UserName ?? "ユーザー")</small>
+                            </div>
+                            <div class="btn-group">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">詳細を見る</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>
+
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">

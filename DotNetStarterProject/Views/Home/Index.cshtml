@@ -1,7 +1,14 @@
 @using DotNetStarterProject.Helpers
+@using Microsoft.AspNetCore.Identity
+@using DotNetStarterProject.Models
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 @model IEnumerable<DotNetStarterProject.Models.DangerSpot>
 @{
     ViewData["Title"] = "ホーム";
+
+    var currentUser = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
+    var showAds = currentUser == null || !(currentUser.AdFreeUntil > DateTime.UtcNow);
 }
 
 <div class="hero-container">
@@ -69,6 +76,39 @@
         </div>
     </div>
 </div>
+
+@if (showAds)
+{
+    <!-- Ad Modal Popup -->
+    <div class="modal fade" id="adModal" tabindex="-1" aria-labelledby="adModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold" id="adModalLabel">
+                        <i class="bi bi-megaphone-fill me-2"></i> スポンサーからのお知らせ
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-gift fs-1 text-primary"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">危険情報を投稿して特典をゲット！</h4>
+                    <p class="text-muted">
+                        SafeWalkでは、地域の安全情報を募集しています。<br>
+                        新しい危険地点を投稿すると、<strong>24時間広告が非表示</strong>になります！
+                    </p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center pb-4">
+                    <a asp-controller="DangerSpots" asp-action="Create" class="btn btn-primary px-4 rounded-pill">
+                        今すぐ投稿する
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <div class="container mb-5">
     <!-- Map Section -->
@@ -187,6 +227,32 @@
             </div>
         </div>
     </div>
+
+    @if (showAds)
+    {
+        <!-- Bottom Ad Section -->
+        <div class="mt-5 pt-4 border-top">
+            <div class="card border-0 shadow-sm bg-light rounded-4 overflow-hidden">
+                <div class="row g-0 align-items-center">
+                    <div class="col-md-8 p-4">
+                        <h5 class="fw-bold text-dark mb-2">
+                            <i class="bi bi-info-circle-fill text-primary me-2"></i> スポンサー広告
+                        </h5>
+                        <p class="text-muted mb-0">
+                            SafeWalk VNJPはスポンサーの支援によって運営されています。安全な街づくりにご協力をお願いします。
+                            <br>
+                            <span class="small">※危険地点を投稿すると、24時間この広告が非表示になります。</span>
+                        </p>
+                    </div>
+                    <div class="col-md-4 p-4 text-center bg-white">
+                        <a asp-controller="DangerSpots" asp-action="Create" class="btn btn-outline-primary fw-bold px-4">
+                            情報を投稿して広告を消す
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @section Scripts {
@@ -194,6 +260,20 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
     <script>
+        @if (showAds)
+        {
+            <text>
+            // Show ad modal on load
+            document.addEventListener('DOMContentLoaded', function() {
+                var modalEl = document.getElementById('adModal');
+                if (modalEl) {
+                    var myModal = new bootstrap.Modal(modalEl);
+                    myModal.show();
+                }
+            });
+            </text>
+        }
+
         // Initialize Map
         const map = L.map('homeMap').setView([10.7769, 106.7009], 13); // Default to HCMC or adjust as needed
         

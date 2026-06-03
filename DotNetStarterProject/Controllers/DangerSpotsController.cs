@@ -157,6 +157,11 @@ public class DangerSpotsController : Controller
         }
 
         _context.Add(dangerSpot);
+        
+        // Grant 24-hour ad-free reward
+        user.AdFreeUntil = DateTime.UtcNow.AddHours(24);
+        await _userManager.UpdateAsync(user);
+
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
