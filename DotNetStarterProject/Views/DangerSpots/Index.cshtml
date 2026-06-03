@@ -89,9 +89,12 @@
                                 <i class="bi bi-image fs-1 opacity-25"></i>
                             </div>
                         }
-                        <div class="position-absolute top-0 end-0 p-3">
+                        <div class="position-absolute top-0 end-0 p-3 d-flex flex-column gap-2">
                             <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(item.ReportCount) shadow-sm px-3 py-2 rounded-pill fw-bold">
                                 @DangerLevelHelper.GetDangerLevel(item.ReportCount)
+                            </span>
+                            <span class="badge @(item.Status == DangerSpotStatus.Resolved ? "bg-success" : (item.Status == DangerSpotStatus.Confirmed ? "bg-warning" : "bg-secondary")) shadow-sm px-3 py-2 rounded-pill fw-bold">
+                                @item.Status
                             </span>
                         </div>
                     </div>

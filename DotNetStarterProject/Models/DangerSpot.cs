@@ -3,6 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DotNetStarterProject.Models;
 
+public enum DangerSpotStatus
+{
+    Open,
+    Confirmed,
+    Resolved
+}
+
 public class DangerSpot
 {
     public long Id { get; set; }
@@ -39,6 +46,8 @@ public class DangerSpot
 
     [ForeignKey("UserId")]
     public ApplicationUser? User { get; set; }
+
+    public DangerSpotStatus Status { get; set; } = DangerSpotStatus.Open;
 
     [NotMapped]
     public int ReportCount { get; set; }

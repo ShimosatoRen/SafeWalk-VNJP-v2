@@ -34,6 +34,9 @@
                             <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(Model.ReportCount) px-3 py-2 rounded-pill fw-bold shadow-sm">
                                 判定: @DangerLevelHelper.GetDangerLevel(Model.ReportCount) (@Model.ReportCount 件の報告)
                             </span>
+                            <span class="badge @(Model.Status == DangerSpotStatus.Resolved ? "bg-success" : (Model.Status == DangerSpotStatus.Confirmed ? "bg-warning" : "bg-secondary")) px-3 py-2 rounded-pill fw-bold shadow-sm">
+                                状態: @Model.Status
+                            </span>
                         </div>
                         <h1 class="text-white fw-black display-5 m-0 text-shadow">@Model.Title</h1>
                     </div>
@@ -43,6 +46,30 @@
                     <div class="row g-5">
                         <!-- Main Info Column -->
                         <div class="col-md-7">
+                            
+                            @if (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.UserId)
+                            {
+                                <section class="mb-5 bg-light p-4 rounded-4">
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-arrow-repeat me-2"></i> 状態の変更</h6>
+                                    <div class="d-flex gap-2">
+                                        <form asp-action="ChangeStatus" method="post">
+                                            <input type="hidden" name="id" value="@Model.Id" />
+                                            <input type="hidden" name="status" value="@DangerSpotStatus.Open" />
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill @(Model.Status == DangerSpotStatus.Open ? "active" : "")">未確認</button>
+                                        </form>
+                                        <form asp-action="ChangeStatus" method="post">
+                                            <input type="hidden" name="id" value="@Model.Id" />
+                                            <input type="hidden" name="status" value="@DangerSpotStatus.Confirmed" />
+                                            <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill @(Model.Status == DangerSpotStatus.Confirmed ? "active" : "")">確認済</button>
+                                        </form>
+                                        <form asp-action="ChangeStatus" method="post">
+                                            <input type="hidden" name="id" value="@Model.Id" />
+                                            <input type="hidden" name="status" value="@DangerSpotStatus.Resolved" />
+                                            <button type="submit" class="btn btn-sm btn-outline-success rounded-pill @(Model.Status == DangerSpotStatus.Resolved ? "active" : "")">解決済</button>
+                                        </form>
+                                    </div>
+                                </section>
+                            }
                             <section class="mb-5">
                                 <h5 class="fw-bold mb-4 d-flex align-items-center">
                                     <i class="bi bi-info-circle-fill text-primary me-2"></i> 危険の詳細
@@ -133,25 +160,23 @@
 <!-- ... (Modal and Style sections remain same, but adding Leaflet scripts) -->
 
 @section Scripts {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
     <script>
-        const lat = @Model.Latitude;
-        const lng = @Model.Longitude;
-        
-        const map = L.map('map', {
-            zoomControl: true,
-            dragging: !L.Browser.mobile,
-            touchZoom: true,
-            scrollWheelZoom: false
-        }).setView([lat, lng], 15);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        L.marker([lat, lng]).addTo(map);
+        function initMap() {
+            const lat = parseFloat(@Model.Latitude);
+            const lng = parseFloat(@Model.Longitude);
+            
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: { lat: lat, lng: lng }
+            });
+            
+            new google.maps.Marker({
+                position: { lat: lat, lng: lng },
+                map: map,
+                title: "@Model.Title"
+            });
+        }
+        window.initMap = initMap;
     </script>
 }
 
