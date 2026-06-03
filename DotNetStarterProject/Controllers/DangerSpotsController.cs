@@ -166,6 +166,31 @@ public class DangerSpotsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // POST: DangerSpots/ChangeStatus/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangeStatus(long id, DangerSpotStatus status)
+    {
+        var dangerSpot = await _context.DangerSpots.FindAsync(id);
+        if (dangerSpot == null)
+        {
+            return NotFound();
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null || dangerSpot.UserId != user.Id)
+        {
+            return Forbid();
+        }
+
+        dangerSpot.Status = status;
+        dangerSpot.UpdatedAt = DateTime.UtcNow;
+        _context.Update(dangerSpot);
+        await _context.SaveChangesAsync();
+        
+        return RedirectToAction(nameof(Details), new { id = id });
+    }
+
     // GET: DangerSpots/Edit/5
     public async Task<IActionResult> Edit(long? id)
     {

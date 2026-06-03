@@ -1,7 +1,9 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @using DotNetStarterProject.Models
+@using Microsoft.Extensions.Configuration
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
+@inject IConfiguration Configuration
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -103,6 +105,6 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script src="https://maps.googleapis.com/maps/api/js?key=@Configuration["GoogleMaps:ApiKey"]&libraries=places&language=ja&callback=initMap" async defer></script>
 </body>
 </html>
-
