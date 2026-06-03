@@ -111,25 +111,6 @@
 }
 
 <div class="container mb-5">
-    <!-- Map Section -->
-    <div class="mb-5">
-        <h3 class="fw-bold mb-4 d-flex align-items-center">
-            <i class="bi bi-map-fill text-primary me-2"></i> 危険地点マップ
-        </h3>
-        <div class="card border-0 shadow-sm overflow-hidden rounded-4">
-            <div id="homeMap" style="height: 500px;"></div>
-            <div class="card-footer bg-white p-3 border-0">
-                <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    <span class="small text-muted"><i class="bi bi-circle-fill text-info me-1"></i> 軽微 (0-1件)</span>
-                    <span class="small text-muted"><i class="bi bi-circle-fill text-success me-1"></i> 注意 (2件)</span>
-                    <span class="small text-muted"><i class="bi bi-circle-fill text-warning me-1"></i> 危険 (3-4件)</span>
-                    <span class="small text-muted"><i class="bi bi-circle-fill text-warning me-1" style="color: orange !important;"></i> 非常に危険 (5-6件)</span>
-                    <span class="small text-muted"><i class="bi bi-circle-fill text-danger me-1"></i> 回避推奨 (7件〜)</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="row g-4 mb-5">
         <!-- Purpose -->
         <div class="col-md-4">
@@ -271,55 +252,10 @@
             </text>
         }
 
-        // Initialize Map
+        // Map removed from Home screen
         function initMap() {
-            const map = new google.maps.Map(document.getElementById("homeMap"), {
-                zoom: 13,
-                center: { lat: 10.7769, lng: 106.7009 }
-            });
-
-            // Add markers for all danger spots
-            const spots = @Html.Raw(Json.Serialize(Model.Select(s => new { 
-                s.Id, 
-                s.Title, 
-                s.Category, 
-                s.Latitude, 
-                s.Longitude,
-                s.ReportCount,
-                DetailsUrl = Url.Action("Details", "DangerSpots", new { id = s.Id })
-            })));
-
-            const bounds = new google.maps.LatLngBounds();
-
-            spots.forEach(spot => {
-                const marker = new google.maps.Marker({
-                    position: { lat: parseFloat(spot.latitude), lng: parseFloat(spot.longitude) },
-                    map: map,
-                    title: spot.title
-                });
-
-                bounds.extend(marker.getPosition());
-
-                const infowindow = new google.maps.InfoWindow({
-                    content: `
-                        <div class="p-1">
-                            <h6 class="fw-bold mb-1">${spot.title}</h6>
-                            <a href="${spot.detailsUrl}" class="btn btn-primary btn-sm w-100 text-white">詳細を見る</a>
-                        </div>
-                    `
-                });
-
-                marker.addListener("click", () => {
-                    infowindow.open(map, marker);
-                });
-            });
-
-            if (spots.length > 0) {
-                map.fitBounds(bounds);
-            }
+            // No-op
         }
-
-        // Wait for Google Maps API to load
         window.initMap = initMap;
     </script>
 }

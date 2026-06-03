@@ -160,6 +160,10 @@ public class DangerSpotsController : Controller
         
         // Grant 24-hour ad-free reward
         user.AdFreeUntil = DateTime.UtcNow.AddHours(24);
+        
+        // Grant 10 points
+        user.Points += 10;
+        
         await _userManager.UpdateAsync(user);
 
         await _context.SaveChangesAsync();

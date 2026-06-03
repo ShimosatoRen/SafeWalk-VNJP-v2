@@ -53,6 +53,12 @@
                                 </li>
                             }
 
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-coin"></i> ポイント: @user?.Points
+                                </span>
+                            </li>
+
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     こんにちは、@(User.Identity?.Name ?? "ユーザー") さん
