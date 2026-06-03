@@ -23,6 +23,21 @@ namespace DotNetStarterProject.Controllers
         public async Task<IActionResult> Index()
         {
             var dangerSpots = await _context.DangerSpots.Include(d => d.User).ToListAsync();
+            
+            // Group by coordinates (rounded to 4 decimals, approx 11m) to count reports per area
+            var groupCounts = dangerSpots.GroupBy(s => new { 
+                Lat = Math.Round(s.Latitude, 4), 
+                Lng = Math.Round(s.Longitude, 4) 
+            }).ToDictionary(g => g.Key, g => g.Count());
+
+            foreach (var spot in dangerSpots)
+            {
+                spot.ReportCount = groupCounts[new { 
+                    Lat = Math.Round(spot.Latitude, 4), 
+                    Lng = Math.Round(spot.Longitude, 4) 
+                }];
+            }
+
             return View(dangerSpots);
         }
 

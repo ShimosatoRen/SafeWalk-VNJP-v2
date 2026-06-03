@@ -25,18 +25,19 @@ public class DangerSpotsController : Controller
     }
 
     // GET: DangerSpots
-    public async Task<IActionResult> Index(string? category, int? dangerLevel, string? searchString)
+    public async Task<IActionResult> Index(string? category, string? searchString)
     {
+        var allSpots = await _context.DangerSpots.ToListAsync();
+        var groupCounts = allSpots.GroupBy(s => new { 
+            Lat = Math.Round(s.Latitude, 4), 
+            Lng = Math.Round(s.Longitude, 4) 
+        }).ToDictionary(g => g.Key, g => g.Count());
+
         var query = _context.DangerSpots.Include(d => d.User).AsQueryable();
 
         if (!string.IsNullOrEmpty(category))
         {
             query = query.Where(d => d.Category == category);
-        }
-
-        if (dangerLevel.HasValue)
-        {
-            query = query.Where(d => d.DangerLevel == dangerLevel.Value);
         }
 
         if (!string.IsNullOrEmpty(searchString))
@@ -46,8 +47,15 @@ public class DangerSpotsController : Controller
 
         var dangerSpots = await query.OrderByDescending(d => d.CreatedAt).ToListAsync();
 
+        foreach (var spot in dangerSpots)
+        {
+            spot.ReportCount = groupCounts[new { 
+                Lat = Math.Round(spot.Latitude, 4), 
+                Lng = Math.Round(spot.Longitude, 4) 
+            }];
+        }
+
         ViewData["CurrentCategory"] = category;
-        ViewData["CurrentDangerLevel"] = dangerLevel;
         ViewData["CurrentFilter"] = searchString;
 
         return View(dangerSpots);
@@ -70,6 +78,10 @@ public class DangerSpotsController : Controller
             return NotFound();
         }
 
+        dangerSpot.ReportCount = await _context.DangerSpots
+            .CountAsync(s => Math.Round(s.Latitude, 4) == Math.Round(dangerSpot.Latitude, 4) && 
+                            Math.Round(s.Longitude, 4) == Math.Round(dangerSpot.Longitude, 4));
+
         return View(dangerSpot);
     }
 
@@ -78,6 +90,20 @@ public class DangerSpotsController : Controller
     public async Task<IActionResult> Map()
     {
         var dangerSpots = await _context.DangerSpots.Include(d => d.User).ToListAsync();
+        
+        var groupCounts = dangerSpots.GroupBy(s => new { 
+            Lat = Math.Round(s.Latitude, 4), 
+            Lng = Math.Round(s.Longitude, 4) 
+        }).ToDictionary(g => g.Key, g => g.Count());
+
+        foreach (var spot in dangerSpots)
+        {
+            spot.ReportCount = groupCounts[new { 
+                Lat = Math.Round(spot.Latitude, 4), 
+                Lng = Math.Round(spot.Longitude, 4) 
+            }];
+        }
+
         return View(dangerSpots);
     }
 
@@ -90,7 +116,7 @@ public class DangerSpotsController : Controller
     // POST: DangerSpots/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Title,Description,Category,DangerLevel,Latitude,Longitude")] DangerSpot dangerSpot, IFormFile? imageFile)
+    public async Task<IActionResult> Create([Bind("Title,Description,Category,Latitude,Longitude")] DangerSpot dangerSpot, IFormFile? imageFile)
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null)
@@ -161,7 +187,7 @@ public class DangerSpotsController : Controller
     // POST: DangerSpots/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(long id, [Bind("Id,Title,Description,Category,DangerLevel,Latitude,Longitude,UserId,CreatedAt,ImagePath")] DangerSpot dangerSpot, IFormFile? imageFile)
+    public async Task<IActionResult> Edit(long id, [Bind("Id,Title,Description,Category,Latitude,Longitude,UserId,CreatedAt,ImagePath")] DangerSpot dangerSpot, IFormFile? imageFile)
     {
         if (id != dangerSpot.Id)
         {

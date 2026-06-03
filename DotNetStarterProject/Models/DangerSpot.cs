@@ -20,10 +20,6 @@ public class DangerSpot
     public string Category { get; set; } = string.Empty;
 
     [Required]
-    [Range(1, 5)]
-    public int DangerLevel { get; set; }
-
-    [Required]
     [Column(TypeName = "decimal(10, 7)")]
     public decimal Latitude { get; set; }
 
@@ -43,4 +39,7 @@ public class DangerSpot
 
     [ForeignKey("UserId")]
     public ApplicationUser? User { get; set; }
+
+    [NotMapped]
+    public int ReportCount { get; set; }
 }
