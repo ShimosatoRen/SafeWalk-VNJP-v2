@@ -73,6 +73,14 @@ public class DangerSpotsController : Controller
         return View(dangerSpot);
     }
 
+    // GET: DangerSpots/Map
+    [AllowAnonymous]
+    public async Task<IActionResult> Map()
+    {
+        var dangerSpots = await _context.DangerSpots.Include(d => d.User).ToListAsync();
+        return View(dangerSpots);
+    }
+
     // GET: DangerSpots/Create
     public IActionResult Create()
     {

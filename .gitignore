@@ -10,6 +10,9 @@
 *.userosscache
 *.sln.docstates
 
+##このコードがあればapiがプッシュされない
+DotNetStarterProject/appsettings.Local.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

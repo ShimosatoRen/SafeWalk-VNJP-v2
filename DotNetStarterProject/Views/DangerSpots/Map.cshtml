@@ -1,0 +1,139 @@
+@model IEnumerable<DotNetStarterProject.Models.DangerSpot>
+@{
+    ViewData["Title"] = "危険地点マップ";
+}
+
+<div class="container-fluid p-0 overflow-hidden" style="height: calc(100vh - 56px);">
+    <div class="row g-0 h-100">
+        <!-- Sidebar for Filtering -->
+        <div class="col-lg-3 col-md-4 border-end bg-white d-flex flex-column h-100 shadow-sm" style="z-index: 1000;">
+            <div class="p-4 border-bottom">
+                <h4 class="fw-bold mb-1">危険地点マップ</h4>
+                <p class="text-muted small mb-0">現在登録されている全ての危険地点を表示しています。</p>
+            </div>
+            <div class="p-4 flex-grow-1 overflow-auto">
+                <div class="mb-4">
+                    <h6 class="fw-bold small text-muted text-uppercase mb-3">凡例</h6>
+                    <div class="d-grid gap-2">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-danger rounded-circle p-2 me-2" style="width: 10px; height: 10px;"></span>
+                            <span class="small">横断困難</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-warning rounded-circle p-2 me-2" style="width: 10px; height: 10px;"></span>
+                            <span class="small">歩道未整備・交通量過多</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-info rounded-circle p-2 me-2" style="width: 10px; height: 10px;"></span>
+                            <span class="small">冠水エリア</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-circle p-2 me-2" style="width: 10px; height: 10px;"></span>
+                            <span class="small">その他</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold small text-muted text-uppercase mb-3">最近の投稿</h6>
+                    <div class="list-group list-group-flush border rounded-3">
+                        @foreach (var spot in Model.OrderByDescending(s => s.CreatedAt).Take(5))
+                        {
+                            <a href="javascript:void(0)" onclick="focusOnMarker(@spot.Latitude, @spot.Longitude)" class="list-group-item list-group-item-action p-3">
+                                <div class="fw-bold text-truncate">@spot.Title</div>
+                                <div class="small text-muted">@spot.Category</div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-top">
+                <a asp-action="Create" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i> 新規投稿する
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Map Area -->
+        <div class="col-lg-9 col-md-8 position-relative">
+            <div id="fullMap" class="h-100"></div>
+            
+            <!-- Quick Info Bar (Bottom) -->
+            <div class="position-absolute bottom-0 start-0 w-100 p-3" style="z-index: 1000; pointer-events: none;">
+                <div class="bg-white bg-opacity-75 p-2 rounded shadow-sm d-inline-block" style="pointer-events: auto;">
+                    <small class="text-dark fw-bold">全 @Model.Count() 件の危険地点を表示中</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script>
+        // Initialize Map
+        const map = L.map('fullMap').setView([10.7769, 106.7009], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add markers for all danger spots
+        const spots = @Html.Raw(Json.Serialize(Model.Select(s => new { 
+            s.Id, 
+            s.Title, 
+            s.Category, 
+            s.Latitude, 
+            s.Longitude,
+            s.DangerLevel,
+            DetailsUrl = Url.Action("Details", "DangerSpots", new { id = s.Id })
+        })));
+
+        const markerGroup = [];
+
+        if (spots.length > 0) {
+            spots.forEach(spot => {
+                let color = '#0d6efd'; // Default primary
+                if (spot.category === 'Crossing') color = '#dc3545'; // Danger
+                if (spot.category === 'NoSidewalk' || spot.category === 'HeavyTraffic') color = '#ffc107'; // Warning
+                if (spot.category === 'Flood') color = '#0dcaf0'; // Info
+
+                const marker = L.circleMarker([spot.latitude, spot.longitude], {
+                    radius: 10,
+                    fillColor: color,
+                    color: "#fff",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <div class="p-2" style="min-width: 200px;">
+                        <h6 class="fw-bold mb-1">${spot.title}</h6>
+                        <p class="small text-muted mb-2">カテゴリ: ${spot.category}<br>危険レベル: ${spot.dangerLevel}</p>
+                        <a href="${spot.detailsUrl}" class="btn btn-primary btn-sm w-100 text-white fw-bold">詳細を見る</a>
+                    </div>
+                `);
+                
+                markerGroup.push([spot.latitude, spot.longitude]);
+            });
+
+            if (markerGroup.length > 0) {
+                map.fitBounds(L.latLngBounds(markerGroup), { padding: [50, 50] });
+            }
+        }
+
+        function focusOnMarker(lat, lng) {
+            map.setView([lat, lng], 16);
+        }
+    </script>
+}
+
+<style>
+    /* Ensure the map fills the available height correctly */
+    footer { display: none; }
+    #fullMap { background: #f8f9fa; }
+    .category-dot { width: 12px; height: 12px; display: inline-block; border-radius: 50%; }
+</style>
