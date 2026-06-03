@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using DotNetStarterProject.Models
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="utf-8" />
@@ -33,11 +38,22 @@
                         </li>
                     </ul>
                     <ul class="navbar-nav">
-                        @if (User.Identity?.IsAuthenticated == true)
+                        @if (SignInManager.IsSignedIn(User))
                         {
+                            var user = await UserManager.GetUserAsync(User);
+                            if (user?.AdFreeUntil != null && user.AdFreeUntil > DateTime.UtcNow)
+                            {
+                                var timeLeft = user.AdFreeUntil.Value - DateTime.UtcNow;
+                                <li class="nav-item d-flex align-items-center me-3">
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-shield-check"></i> 広告非表示中 (残り @($"{timeLeft.Hours:D2}:{timeLeft.Minutes:D2}"))
+                                    </span>
+                                </li>
+                            }
+
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    こんにちは、@(User.Identity.Name) さん
+                                    こんにちは、@(User.Identity?.Name ?? "ユーザー") さん
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <li>

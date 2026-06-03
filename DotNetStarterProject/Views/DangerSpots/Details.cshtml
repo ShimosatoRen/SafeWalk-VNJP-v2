@@ -58,28 +58,21 @@
                                     <div class="list-group-item d-flex justify-content-between align-items-center p-3">
                                         <span class="text-muted fw-bold small text-uppercase">カテゴリ</span>
                                         @{
-                                            var tagClass = Model.Category switch
+                                            var (tagClass, displayName, icon) = Model.Category switch
                                             {
-                                                "Crossing" => "text-danger border-danger bg-danger-soft",
-                                                "NoSidewalk" => "text-warning border-warning bg-warning-soft",
-                                                "HeavyTraffic" => "text-warning border-warning bg-warning-soft",
-                                                "Flood" => "text-info border-info bg-info-soft",
-                                                "NightRisk" => "text-secondary border-secondary bg-secondary-soft",
-                                                _ => "text-primary border-primary bg-primary-soft"
-                                            };
-                                            var (dummyClass, displayName) = Model.Category switch
-                                            {
-                                                "Crossing" => ("", "横断困難"),
-                                                "NoSidewalk" => ("", "歩道未整備"),
-                                                "HeavyTraffic" => ("", "バイク交通量過多"),
-                                                "Flood" => ("", "冠水エリア"),
-                                                "NightRisk" => ("", "夜間危険"),
-                                                "Construction" => ("", "工事中"),
-                                                "NoSignal" => ("", "信号機なし"),
-                                                _ => ("", Model.Category)
+                                                "Crossing" => ("text-danger bg-danger-soft", "横断困難", "bi-signpost-2"),
+                                                "NoSidewalk" => ("text-warning bg-warning-soft", "歩道未整備", "bi-hammer"),
+                                                "HeavyTraffic" => ("text-warning bg-warning-soft", "バイク交通量過多", "bi-bicycle"),
+                                                "Flood" => ("text-info bg-info-soft", "冠水エリア", "bi-water"),
+                                                "NightRisk" => ("text-secondary bg-secondary-soft", "夜間危険", "bi-moon-stars"),
+                                                "Construction" => ("text-primary bg-primary-soft", "工事中", "bi-cone-striped"),
+                                                "NoSignal" => ("text-primary bg-primary-soft", "信号機なし", "bi-traffic-light"),
+                                                _ => ("text-primary bg-primary-soft", Model.Category, "bi-geo-alt")
                                             };
                                         }
-                                        <span class="category-tag px-3 py-1 rounded-pill @tagClass">@displayName</span>
+                                        <span class="category-tag px-3 py-1 rounded-pill @tagClass">
+                                            <i class="bi @icon me-1"></i> @displayName
+                                        </span>
                                     </div>
                                     <div class="list-group-item d-flex justify-content-between align-items-center p-3">
                                         <span class="text-muted fw-bold small text-uppercase">登録日時</span>
