@@ -124,50 +124,56 @@ public class DangerSpotsController : Controller
             return Challenge();
         }
 
-        dangerSpot.UserId = user.Id;
-        dangerSpot.CreatedAt = DateTime.UtcNow;
-
-        if (imageFile != null && imageFile.Length > 0)
+        try
         {
-            string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolder))
+            dangerSpot.UserId = user.Id;
+            dangerSpot.CreatedAt = DateTime.UtcNow;
+
+            if (imageFile != null && imageFile.Length > 0)
             {
-                Directory.CreateDirectory(uploadsFolder);
+                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageFile.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(fileStream);
+                }
+
+                dangerSpot.ImagePath = "/uploads/" + uniqueFileName;
             }
 
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageFile.FileName;
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            if (string.IsNullOrEmpty(dangerSpot.Title) || string.IsNullOrEmpty(dangerSpot.Description) || string.IsNullOrEmpty(dangerSpot.Category))
             {
-                await imageFile.CopyToAsync(fileStream);
+                ModelState.AddModelError("", "タイトル、詳細、カテゴリは必須入力項目です。");
+                return View(dangerSpot);
             }
 
-            dangerSpot.ImagePath = "/uploads/" + uniqueFileName;
+            _context.Add(dangerSpot);
+            
+            // Grant 24-hour ad-free reward
+            user.AdFreeUntil = DateTime.UtcNow.AddHours(24);
+            
+            // Grant 10 points
+            user.Points += 10;
+            
+            await _userManager.UpdateAsync(user);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "投稿が完了しました！報酬として10ポイントと24時間の広告非表示特典が付与されました。";
+            return RedirectToAction(nameof(Index));
         }
-
-        // We don't use ModelState.IsValid here because we are setting UserId and CreatedAt manually
-        // and [Bind] might miss some required fields or include navigation properties.
-        // For simplicity in this starter, we'll do basic checks.
-        
-        if (string.IsNullOrEmpty(dangerSpot.Title) || string.IsNullOrEmpty(dangerSpot.Description) || string.IsNullOrEmpty(dangerSpot.Category))
+        catch (Exception)
         {
-            ModelState.AddModelError("", "Title, Description, and Category are required.");
+            // Log the exception
+            ModelState.AddModelError("", "投稿の保存中にエラーが発生しました。入力内容を確認し、再度お試しください。");
             return View(dangerSpot);
         }
-
-        _context.Add(dangerSpot);
-        
-        // Grant 24-hour ad-free reward
-        user.AdFreeUntil = DateTime.UtcNow.AddHours(24);
-        
-        // Grant 10 points
-        user.Points += 10;
-        
-        await _userManager.UpdateAsync(user);
-
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
     }
 
     // POST: DangerSpots/ChangeStatus/5
@@ -234,37 +240,40 @@ public class DangerSpotsController : Controller
             return Forbid();
         }
 
-        if (imageFile != null && imageFile.Length > 0)
-        {
-            string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
-
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageFile.FileName;
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(fileStream);
-            }
-
-            // Optionally delete old image here
-            dangerSpot.ImagePath = "/uploads/" + uniqueFileName;
-        }
-
-        if (string.IsNullOrEmpty(dangerSpot.Title) || string.IsNullOrEmpty(dangerSpot.Description) || string.IsNullOrEmpty(dangerSpot.Category))
-        {
-            ModelState.AddModelError("", "Title, Description, and Category are required.");
-            return View(dangerSpot);
-        }
-
         try
         {
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageFile.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(fileStream);
+                }
+
+                // Optionally delete old image here
+                dangerSpot.ImagePath = "/uploads/" + uniqueFileName;
+            }
+
+            if (string.IsNullOrEmpty(dangerSpot.Title) || string.IsNullOrEmpty(dangerSpot.Description) || string.IsNullOrEmpty(dangerSpot.Category))
+            {
+                ModelState.AddModelError("", "タイトル、詳細、カテゴリは必須入力項目です。");
+                return View(dangerSpot);
+            }
+
             dangerSpot.UpdatedAt = DateTime.UtcNow;
             _context.Update(dangerSpot);
             await _context.SaveChangesAsync();
+            
+            TempData["SuccessMessage"] = "投稿を更新しました。";
+            return RedirectToAction(nameof(Index));
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -274,10 +283,14 @@ public class DangerSpotsController : Controller
             }
             else
             {
-                throw;
+                ModelState.AddModelError("", "他のユーザーによって更新された可能性があります。再度読み込み直してください。");
             }
         }
-        return RedirectToAction(nameof(Index));
+        catch (Exception)
+        {
+            ModelState.AddModelError("", "更新中にエラーが発生しました。");
+        }
+        return View(dangerSpot);
     }
 
     // POST: DangerSpots/Delete/5
@@ -285,17 +298,25 @@ public class DangerSpotsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(long id)
     {
-        var dangerSpot = await _context.DangerSpots.FindAsync(id);
-        if (dangerSpot != null)
+        try
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null || dangerSpot.UserId != user.Id)
+            var dangerSpot = await _context.DangerSpots.FindAsync(id);
+            if (dangerSpot != null)
             {
-                return Forbid();
-            }
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null || dangerSpot.UserId != user.Id)
+                {
+                    return Forbid();
+                }
 
-            _context.DangerSpots.Remove(dangerSpot);
-            await _context.SaveChangesAsync();
+                _context.DangerSpots.Remove(dangerSpot);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "投稿を削除しました。";
+            }
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "削除中にエラーが発生しました。";
         }
 
         return RedirectToAction(nameof(Index));

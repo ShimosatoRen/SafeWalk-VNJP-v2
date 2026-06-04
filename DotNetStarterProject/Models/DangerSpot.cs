@@ -14,24 +14,29 @@ public class DangerSpot
 {
     public long Id { get; set; }
 
-    [Required]
-    [MaxLength(100)]
+    [Required(ErrorMessage = "タイトルを入力してください。")]
+    [MaxLength(100, ErrorMessage = "タイトルは100文字以内で入力してください。")]
+    [Display(Name = "タイトル")]
     public string Title { get; set; } = string.Empty;
 
-    [Required]
-    [MaxLength(1000)]
+    [Required(ErrorMessage = "詳細な状況を入力してください。")]
+    [MaxLength(1000, ErrorMessage = "詳細は1000文字以内で入力してください。")]
+    [Display(Name = "詳細な状況")]
     public string Description { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "カテゴリを選択してください。")]
     [MaxLength(50)]
+    [Display(Name = "カテゴリ")]
     public string Category { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "緯度を指定してください。マップをクリックして選択できます。")]
     [Column(TypeName = "decimal(10, 7)")]
+    [Display(Name = "緯度")]
     public decimal Latitude { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "経度を指定してください。マップをクリックして選択できます。")]
     [Column(TypeName = "decimal(10, 7)")]
+    [Display(Name = "経度")]
     public decimal Longitude { get; set; }
 
     [MaxLength(255)]
