@@ -34,21 +34,25 @@ public class DangerSpotsController : Controller
             Lng = Math.Round(s.Longitude, 4) 
         }).ToDictionary(g => g.Key, g => g.Count());
 
+        // 検索およびフィルタリングのクエリを作成
         var query = _context.DangerSpots.Include(d => d.User).AsQueryable();
 
+        // 1. カテゴリフィルタ
         if (!string.IsNullOrEmpty(category))
         {
             query = query.Where(d => d.Category.Contains(category));
         }
 
+        // 2. キーワード検索（タイトルまたは説明文）
         if (!string.IsNullOrEmpty(searchString))
         {
             query = query.Where(d => d.Title.Contains(searchString) || d.Description.Contains(searchString));
         }
 
+        // 3. 危険レベルフィルタ用のデータを一度取得
         var dangerSpots = await query.OrderByDescending(d => d.CreatedAt).ToListAsync();
 
-        // カテゴリベースのレベルと報告数を計算
+        // カテゴリベースのレベルと報告数を計算（計算用に全件取得済み）
         foreach (var spot in dangerSpots)
         {
             spot.ReportCount = groupCounts[new { 
@@ -58,7 +62,7 @@ public class DangerSpotsController : Controller
             spot.Level = DangerLevelHelper.CalculateLevel(spot.Category);
         }
 
-        // 危険レベルでフィルタリング
+        // 4. 危険レベルでフィルタリング
         if (dangerLevel.HasValue)
         {
             dangerSpots = dangerSpots.Where(s => s.Level == dangerLevel.Value).ToList();
@@ -66,7 +70,7 @@ public class DangerSpotsController : Controller
 
         ViewData["CurrentCategory"] = category;
         ViewData["CurrentDangerLevel"] = dangerLevel;
-        ViewData["CurrentFilter"] = searchString;
+        ViewData["CurrentFilter"] = searchString; // 検索キーワードをViewに渡す
 
         return View(dangerSpots);
     }
