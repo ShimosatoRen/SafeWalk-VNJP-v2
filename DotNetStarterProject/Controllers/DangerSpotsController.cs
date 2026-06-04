@@ -143,6 +143,12 @@ public class DangerSpotsController : Controller
         return View(mySpots);
     }
 
+    // GET: DangerSpots/Create
+    public IActionResult Create()
+    {
+        return View();
+    }
+
     // POST: DangerSpots/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
