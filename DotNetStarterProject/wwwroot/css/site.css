@@ -147,6 +147,21 @@ footer.footer-custom {
     padding: 2rem 0;
 }
 
+#google_translate_element {
+    margin-right: 15px;
+}
+.goog-te-gadget-simple {
+    background-color: transparent !important;
+    border: 1px solid #fff !important;
+    padding: 5px !important;
+    border-radius: 5px !important;
+    color: #fff !important;
+}
+.goog-te-gadget-simple .goog-te-menu-value span {
+    color: #fff !important;
+}
+
+
 .footer-custom a {
     color: rgba(255,255,255,0.7);
     text-decoration: none;
