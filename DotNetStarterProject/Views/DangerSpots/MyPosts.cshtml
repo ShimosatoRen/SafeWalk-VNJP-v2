@@ -1,0 +1,63 @@
+@model IEnumerable<DotNetStarterProject.Models.DangerSpot>
+@using DotNetStarterProject.Helpers
+
+@{
+    ViewData["Title"] = "自分の投稿一覧";
+}
+
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">自分の投稿一覧</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">投稿した危険地点はありません。</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>タイトル</th>
+                        <th>カテゴリ</th>
+                        <th>危険度</th>
+                        <th>投稿日</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Title</td>
+                            <td>
+                                @foreach (var cat in item.Category.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    <span class="badge bg-secondary">@cat</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(item.Level)">
+                                    @DangerLevelHelper.GetDangerLevel(item.Level)
+                                </span>
+                            </td>
+                            <td>@item.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd")</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">編集</a>
+                                <!-- 削除ボタンにデータ属性を設定 -->
+                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                        data-id="@item.Id" data-title="@item.Title">
+                                    削除
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- 既存の削除用モーダルを流用するため、Index.cshtmlの末尾にあるものをそのまま利用 -->
+<!-- (実際には_Layout等で共有化すべきですが、今回は要件通り既存機能を維持するためIndexから流用します) -->

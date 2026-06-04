@@ -123,10 +123,24 @@ public class DangerSpotsController : Controller
         return View(dangerSpots);
     }
 
-    // GET: DangerSpots/Create
-    public IActionResult Create()
+    // GET: DangerSpots/MyPosts
+    public async Task<IActionResult> MyPosts()
     {
-        return View();
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
+        var mySpots = await _context.DangerSpots
+            .Include(d => d.User)
+            .Where(d => d.UserId == user.Id)
+            .OrderByDescending(d => d.CreatedAt)
+            .ToListAsync();
+
+        foreach (var spot in mySpots)
+        {
+            spot.Level = DangerLevelHelper.CalculateLevel(spot.Category);
+        }
+
+        return View(mySpots);
     }
 
     // POST: DangerSpots/Create

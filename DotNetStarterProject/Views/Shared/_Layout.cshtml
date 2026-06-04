@@ -44,27 +44,47 @@
                 <li class="nav-item">
                     <a class="nav-link text-white" asp-controller="DangerSpots" asp-action="Map"><i class="bi bi-map me-2"></i> マップ</a>
                 </li>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Account" asp-action="MyPage"><i class="bi bi-person-badge me-2"></i> マイページ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="DangerSpots" asp-action="MyPosts"><i class="bi bi-pencil-square me-2"></i> 自分の投稿</a>
+                    </li>
+                }
             </ul>
             <hr class="text-white">
-            @if (SignInManager.IsSignedIn(User))
-            {
-                var user = await UserManager.GetUserAsync(User);
-                <div class="mb-3">
-                    <span class="d-block mb-2"><i class="bi bi-coin me-2"></i> ポイント: @user?.Points</span>
-                    <form asp-controller="Account" asp-action="ExchangePoints" method="post">
+            <div class="user-info-area text-white">
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    var user = await UserManager.GetUserAsync(User);
+                    // 投稿件数を取得（DBから集計）
+                    var postCount = user.DangerSpots.Count;
+                    <div class="mb-3">
+                    <a asp-controller="Account" asp-action="MyPage" class="d-flex align-items-center mb-2 text-white text-decoration-none">
+                        <i class="bi bi-person-circle fs-3 me-2"></i>
+                        <span class="fw-bold">@User.Identity?.Name</span>
+                    </a>
+                    <div class="small"><i class="bi bi-pencil-square me-2"></i> 投稿数: @postCount 件</div>
+                    <div class="small"><i class="bi bi-coin me-2"></i> ポイント: @user?.Points pt</div>
+                    </div>
+                    <form asp-controller="Account" asp-action="ExchangePoints" method="post" class="mb-2">
                         <button type="submit" class="btn btn-sm btn-outline-light w-100"><i class="bi bi-gift me-2"></i> 交換 (10pt)</button>
                     </form>
-                </div>
-                <hr class="text-white">
-                <form asp-controller="Account" asp-action="Logout" method="post">
-                    <button type="submit" class="btn btn-outline-danger w-100"><i class="bi bi-box-arrow-left me-2"></i> ログアウト</button>
-                </form>
-            }
-            else
-            {
-                <a class="btn btn-primary w-100 mb-2" asp-controller="Account" asp-action="Login">ログイン</a>
-                <a class="btn btn-outline-light w-100" asp-controller="Account" asp-action="Register">新規登録</a>
-            }
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="btn btn-outline-danger w-100"><i class="bi bi-box-arrow-left me-2"></i> ログアウト</button>
+                    </form>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <i class="bi bi-person-circle fs-3 me-2"></i> ゲストユーザー
+                    </div>
+                    <a class="btn btn-primary w-100 mb-2" asp-controller="Account" asp-action="Login">ログイン</a>
+                    <a class="btn btn-outline-light w-100" asp-controller="Account" asp-action="Register">新規登録</a>
+                }
+            </div>
         </div>
     </div>
 

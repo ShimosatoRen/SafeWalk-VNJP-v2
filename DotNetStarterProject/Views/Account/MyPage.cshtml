@@ -1,0 +1,119 @@
+@model DotNetStarterProject.Models.ApplicationUser
+@using DotNetStarterProject.Helpers
+
+@{
+    ViewData["Title"] = "マイページ";
+}
+
+<div class="container py-4">
+    <!-- ステータスエリア -->
+    <div class="card shadow-sm border-0 mb-4 p-4">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="bi bi-person"></i>
+                </div>
+            </div>
+            <div class="col">
+                <h2 class="fw-bold mb-1">@Model.UserName</h2>
+                <p class="text-muted small mb-2">登録日: 2026/06/04</p>
+                <div class="d-flex gap-3 mb-3">
+                    <span class="badge bg-primary px-3 py-2"><i class="bi bi-coin me-1"></i> ポイント: @Model.Points pt</span>
+                    <span class="badge bg-info text-white px-3 py-2"><i class="bi bi-heart-fill me-1"></i> 獲得ありがとう: 12回</span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <div class="d-flex justify-content-between mb-1">
+                <span class="fw-bold">ランク: シルバーサポーター</span>
+                <span class="small text-muted">あと 50 pt でゴールド</span>
+            </div>
+            <div class="progress" style="height: 10px;">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 66%;" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- タブメニュー -->
+    <ul class="nav nav-tabs mb-4" id="myPageTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="myposts-tab" data-bs-toggle="tab" data-bs-target="#myposts" type="button" role="tab" aria-controls="myposts" aria-selected="true">自分の投稿 (@Model.DangerSpots.Count)</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="bookmarks-tab" data-bs-toggle="tab" data-bs-target="#bookmarks" type="button" role="tab" aria-controls="bookmarks" aria-selected="false">保存した投稿 (0)</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="areas-tab" data-bs-toggle="tab" data-bs-target="#areas" type="button" role="tab" aria-controls="areas" aria-selected="false">登録エリア (1)</button>
+        </li>
+    </ul>
+
+    <!-- タブコンテンツ -->
+    <div class="tab-content" id="myPageTabsContent">
+        <!-- 自分の投稿 -->
+        <div class="tab-pane fade show active" id="myposts" role="tabpanel" aria-labelledby="myposts-tab">
+            @if (!Model.DangerSpots.Any())
+            {
+                <div class="alert alert-info">投稿した危険地点はありません。</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>タイトル</th>
+                                <th>カテゴリ</th>
+                                <th>危険度</th>
+                                <th>投稿日</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.DangerSpots.OrderByDescending(d => d.CreatedAt))
+                            {
+                                <tr>
+                                    <td>@item.Title</td>
+                                    <td>
+                                        @foreach (var cat in item.Category.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                        {
+                                            <span class="badge bg-secondary">@cat</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(DangerLevelHelper.CalculateLevel(item.Category))">
+                                            @DangerLevelHelper.GetDangerLevel(DangerLevelHelper.CalculateLevel(item.Category))
+                                        </span>
+                                    </td>
+                                    <td>@item.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd")</td>
+                                    <td>
+                                        <a asp-controller="DangerSpots" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">詳細</a>
+                                        <a asp-controller="DangerSpots" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">編集</a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                                data-id="@item.Id" data-title="@item.Title">
+                                            削除
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+        <!-- 保存した投稿 -->
+        <div class="tab-pane fade" id="bookmarks" role="tabpanel" aria-labelledby="bookmarks-tab">
+            <div class="alert alert-light border">保存された投稿はまだありません。</div>
+        </div>
+        <!-- 登録エリア -->
+        <div class="tab-pane fade" id="areas" role="tabpanel" aria-labelledby="areas-tab">
+            <div class="card shadow-sm border-0 p-3">
+                <h5 class="fw-bold"><i class="bi bi-geo-alt"></i> ホーチミン市 1区</h5>
+                <p class="text-muted small">現在の注意報：冠水注意（雨季のため）</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 削除用モーダル -->
+<!-- (削除モーダルのHTMLは省略: 以前の記述を維持) -->
