@@ -1,6 +1,8 @@
 using DotNetStarterProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DotNetStarterProject.Controllers;
 
@@ -114,6 +116,19 @@ public sealed class AccountController : Controller
         }
 
         return View(model);
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> MyPage()
+    {
+        var user = await _userManager.Users
+            .Include(u => u.DangerSpots)
+            .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+
+        if (user == null) return NotFound();
+
+        return View(user);
     }
 
     [HttpPost]
