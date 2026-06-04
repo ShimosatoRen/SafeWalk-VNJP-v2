@@ -32,20 +32,30 @@ public sealed class AccountController : Controller
             return View(model);
         }
 
-        var user = new ApplicationUser
+        try
         {
-            UserName = model.UserName,
-            Email = model.Email
-        };
+            var user = new ApplicationUser
+            {
+                UserName = model.UserName,
+                Email = model.Email
+            };
 
-        var result = await _userManager.CreateAsync(user, model.Password);
-        if (result.Succeeded)
-        {
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            return RedirectToAction("Index", "Home");
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                TempData["SuccessMessage"] = "ユーザー登録が完了しました。ようこそ SafeWalk VNJP へ！";
+                return RedirectToAction("Index", "Home");
+            }
+
+            AddIdentityErrors(result);
         }
-
-        AddIdentityErrors(result);
+        catch (Exception)
+        {
+            // Log the exception here if logging is available
+            ModelState.AddModelError("", "ユーザー登録中に予期せぬエラーが発生しました。時間を置いて再度お試しいただくか、管理者にお問い合わせください。");
+        }
+        
         return View(model);
     }
 
@@ -61,38 +71,48 @@ public sealed class AccountController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        var user = await _userManager.FindByEmailAsync(model.Email);
-
-        if (user == null)
+        try
         {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。入力内容をご確認のうえ、再度お試しください。");
+                return View(model);
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(
+                user.UserName!,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: true);
+
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "ログインしました。";
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError("", "連続してログインに失敗したため、アカウントが一時的にロックされました。5分後に再度お試しください。");
+                return View(model);
+            }
+
+            if (result.IsNotAllowed)
+            {
+                ModelState.AddModelError("", "このアカウントはまだ有効化されていません。メールを確認してください。");
+                return View(model);
+            }
+
             ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。入力内容をご確認のうえ、再度お試しください。");
-            return View(model);
         }
-
-        var result = await _signInManager.PasswordSignInAsync(
-            user.UserName!,
-            model.Password,
-            model.RememberMe,
-            lockoutOnFailure: true);
-
-        if (result.Succeeded)
+        catch (Exception)
         {
-            return RedirectToAction("Index", "Home");
+            // Log the exception here
+            ModelState.AddModelError("", "ログイン処理中に予期せぬエラーが発生しました。時間を置いて再度お試しください。");
         }
 
-        if (result.IsLockedOut)
-        {
-            ModelState.AddModelError("", "連続してログインに失敗したため、アカウントが一時的にロックされました。5分後に再度お試しください。");
-            return View(model);
-        }
-
-        if (result.IsNotAllowed)
-        {
-            ModelState.AddModelError("", "このアカウントはまだ有効化されていません。メールを確認してください。");
-            return View(model);
-        }
-
-        ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。入力内容をご確認のうえ、再度お試しください。");
         return View(model);
     }
 
