@@ -1,4 +1,5 @@
 using DotNetStarterProject.Data;
+using DotNetStarterProject.Helpers;
 using DotNetStarterProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -25,7 +26,7 @@ public class DangerSpotsController : Controller
     }
 
     // GET: DangerSpots
-    public async Task<IActionResult> Index(string? category, string? searchString)
+    public async Task<IActionResult> Index(string? category, int? dangerLevel, string? searchString)
     {
         var allSpots = await _context.DangerSpots.ToListAsync();
         var groupCounts = allSpots.GroupBy(s => new { 
@@ -37,7 +38,7 @@ public class DangerSpotsController : Controller
 
         if (!string.IsNullOrEmpty(category))
         {
-            query = query.Where(d => d.Category == category);
+            query = query.Where(d => d.Category.Contains(category));
         }
 
         if (!string.IsNullOrEmpty(searchString))
@@ -47,15 +48,24 @@ public class DangerSpotsController : Controller
 
         var dangerSpots = await query.OrderByDescending(d => d.CreatedAt).ToListAsync();
 
+        // カテゴリベースのレベルと報告数を計算
         foreach (var spot in dangerSpots)
         {
             spot.ReportCount = groupCounts[new { 
                 Lat = Math.Round(spot.Latitude, 4), 
                 Lng = Math.Round(spot.Longitude, 4) 
             }];
+            spot.Level = DangerLevelHelper.CalculateLevel(spot.Category);
+        }
+
+        // 危険レベルでフィルタリング
+        if (dangerLevel.HasValue)
+        {
+            dangerSpots = dangerSpots.Where(s => s.Level == dangerLevel.Value).ToList();
         }
 
         ViewData["CurrentCategory"] = category;
+        ViewData["CurrentDangerLevel"] = dangerLevel;
         ViewData["CurrentFilter"] = searchString;
 
         return View(dangerSpots);
@@ -81,6 +91,8 @@ public class DangerSpotsController : Controller
         dangerSpot.ReportCount = await _context.DangerSpots
             .CountAsync(s => Math.Round(s.Latitude, 4) == Math.Round(dangerSpot.Latitude, 4) && 
                             Math.Round(s.Longitude, 4) == Math.Round(dangerSpot.Longitude, 4));
+        
+        dangerSpot.Level = DangerLevelHelper.CalculateLevel(dangerSpot.Category);
 
         return View(dangerSpot);
     }
@@ -116,12 +128,35 @@ public class DangerSpotsController : Controller
     // POST: DangerSpots/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Title,Description,Category,Latitude,Longitude")] DangerSpot dangerSpot, IFormFile? imageFile)
+    public async Task<IActionResult> Create(
+        [Bind("Title,Description,Latitude,Longitude")] DangerSpot dangerSpot,
+        string[] SelectedCategories,
+        IFormFile? imageFile)
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null)
         {
             return Challenge();
+        }
+
+        // カテゴリの設定
+        dangerSpot.Category = SelectedCategories != null && SelectedCategories.Length > 0 
+            ? string.Join(",", SelectedCategories) 
+            : string.Empty;
+        
+        // バリデーションの調整
+        ModelState.Remove("Category");
+        ModelState.Remove("UserId");
+        ModelState.Remove("User");
+
+        if (string.IsNullOrEmpty(dangerSpot.Category))
+        {
+            ModelState.AddModelError("Category", "カテゴリを選択してください。");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(dangerSpot);
         }
 
         try
@@ -146,12 +181,6 @@ public class DangerSpotsController : Controller
                 }
 
                 dangerSpot.ImagePath = "/uploads/" + uniqueFileName;
-            }
-
-            if (string.IsNullOrEmpty(dangerSpot.Title) || string.IsNullOrEmpty(dangerSpot.Description) || string.IsNullOrEmpty(dangerSpot.Category))
-            {
-                ModelState.AddModelError("", "タイトル、詳細、カテゴリは必須入力項目です。");
-                return View(dangerSpot);
             }
 
             _context.Add(dangerSpot);
@@ -227,21 +256,67 @@ public class DangerSpotsController : Controller
     // POST: DangerSpots/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(long id, [Bind("Id,Title,Description,Category,Latitude,Longitude,UserId,CreatedAt,ImagePath")] DangerSpot dangerSpot, IFormFile? imageFile)
+    public async Task<IActionResult> Edit(
+        long id,
+        [Bind("Id,Title,Description,Latitude,Longitude")] DangerSpot dangerSpot,
+        string[] SelectedCategories,
+        IFormFile? imageFile)
     {
         if (id != dangerSpot.Id)
         {
             return NotFound();
         }
 
+        // 既存データの取得（追跡あり）
+        var spotToUpdate = await _context.DangerSpots.FirstOrDefaultAsync(s => s.Id == id);
+        if (spotToUpdate == null)
+        {
+            return NotFound();
+        }
+
+        // 所有者確認
         var user = await _userManager.GetUserAsync(User);
-        if (user == null || dangerSpot.UserId != user.Id)
+        if (user == null || spotToUpdate.UserId != user.Id)
         {
             return Forbid();
         }
 
+        // カテゴリの処理
+        var joinedCategories = SelectedCategories != null && SelectedCategories.Length > 0 
+            ? string.Join(",", SelectedCategories) 
+            : string.Empty;
+        
+        // バリデーションの調整
+        ModelState.Remove("Category");
+        ModelState.Remove("UserId");
+        ModelState.Remove("User");
+
+        if (string.IsNullOrEmpty(joinedCategories))
+        {
+            ModelState.AddModelError("Category", "カテゴリを選択してください。");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            // バリデーションエラー時は元の情報を一部戻して表示
+            dangerSpot.Category = joinedCategories;
+            // UserIdやCreatedAtなどはDBにあるので、必要なら補完する（Viewでの表示用）
+            dangerSpot.UserId = spotToUpdate.UserId;
+            dangerSpot.CreatedAt = spotToUpdate.CreatedAt;
+            dangerSpot.ImagePath = spotToUpdate.ImagePath;
+            return View(dangerSpot);
+        }
+
         try
         {
+            // 各フィールドの更新
+            spotToUpdate.Title = dangerSpot.Title;
+            spotToUpdate.Description = dangerSpot.Description;
+            spotToUpdate.Latitude = dangerSpot.Latitude;
+            spotToUpdate.Longitude = dangerSpot.Longitude;
+            spotToUpdate.Category = joinedCategories;
+            spotToUpdate.UpdatedAt = DateTime.UtcNow;
+
             if (imageFile != null && imageFile.Length > 0)
             {
                 string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads");
@@ -258,18 +333,9 @@ public class DangerSpotsController : Controller
                     await imageFile.CopyToAsync(fileStream);
                 }
 
-                // Optionally delete old image here
-                dangerSpot.ImagePath = "/uploads/" + uniqueFileName;
+                spotToUpdate.ImagePath = "/uploads/" + uniqueFileName;
             }
 
-            if (string.IsNullOrEmpty(dangerSpot.Title) || string.IsNullOrEmpty(dangerSpot.Description) || string.IsNullOrEmpty(dangerSpot.Category))
-            {
-                ModelState.AddModelError("", "タイトル、詳細、カテゴリは必須入力項目です。");
-                return View(dangerSpot);
-            }
-
-            dangerSpot.UpdatedAt = DateTime.UtcNow;
-            _context.Update(dangerSpot);
             await _context.SaveChangesAsync();
             
             TempData["SuccessMessage"] = "投稿を更新しました。";

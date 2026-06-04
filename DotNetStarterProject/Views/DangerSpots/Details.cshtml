@@ -31,8 +31,11 @@
                     }
                     <div class="position-absolute bottom-0 start-0 w-100 p-4 p-md-5" style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
                         <div class="d-flex align-items-center gap-3 mb-2">
-                            <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(Model.ReportCount) px-3 py-2 rounded-pill fw-bold shadow-sm">
-                                判定: @DangerLevelHelper.GetDangerLevel(Model.ReportCount) (@Model.ReportCount 件の報告)
+                            <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(Model.Level) px-3 py-2 rounded-pill fw-bold shadow-sm">
+                                判定: @DangerLevelHelper.GetDangerLevel(Model.Level)
+                            </span>
+                            <span class="badge bg-light text-dark px-3 py-2 rounded-pill fw-bold shadow-sm">
+                                報告: @Model.ReportCount 件
                             </span>
                             <span class="badge @(Model.Status == DangerSpotStatus.Resolved ? "bg-success" : (Model.Status == DangerSpotStatus.Confirmed ? "bg-warning" : "bg-secondary")) px-3 py-2 rounded-pill fw-bold shadow-sm">
                                 状態: @Model.Status
@@ -84,22 +87,26 @@
                                 <div class="list-group list-group-flush rounded-3 border">
                                     <div class="list-group-item d-flex justify-content-between align-items-center p-3">
                                         <span class="text-muted fw-bold small text-uppercase">カテゴリ</span>
-                                        @{
-                                            var (tagClass, displayName, icon) = Model.Category switch
+                                        <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                            @foreach (var category in Model.Category.Split(',', StringSplitOptions.RemoveEmptyEntries))
                                             {
-                                                "Crossing" => ("text-danger bg-danger-soft", "横断困難", "bi-signpost-2"),
-                                                "NoSidewalk" => ("text-warning bg-warning-soft", "歩道未整備", "bi-hammer"),
-                                                "HeavyTraffic" => ("text-warning bg-warning-soft", "バイク交通量過多", "bi-bicycle"),
-                                                "Flood" => ("text-info bg-info-soft", "冠水エリア", "bi-water"),
-                                                "NightRisk" => ("text-secondary bg-secondary-soft", "夜間危険", "bi-moon-stars"),
-                                                "Construction" => ("text-primary bg-primary-soft", "工事中", "bi-cone-striped"),
-                                                "NoSignal" => ("text-primary bg-primary-soft", "信号機なし", "bi-traffic-light"),
-                                                _ => ("text-primary bg-primary-soft", Model.Category, "bi-geo-alt")
-                                            };
-                                        }
-                                        <span class="category-tag px-3 py-1 rounded-pill @tagClass">
-                                            <i class="bi @icon me-1"></i> @displayName
-                                        </span>
+                                                var (tagClass, displayName, icon) = category.Trim() switch
+                                                {
+                                                    "Crossing" => ("text-danger bg-danger-soft", "横断困難", "bi-signpost-2"),
+                                                    "NoSidewalk" => ("text-warning bg-warning-soft", "歩道未整備", "bi-hammer"),
+                                                    "HeavyTraffic" => ("text-warning bg-warning-soft", "バイク交通量過多", "bi-bicycle"),
+                                                    "Flood" => ("text-info bg-info-soft", "冠水エリア", "bi-water"),
+                                                    "NightRisk" => ("text-secondary bg-secondary-soft", "夜間危険", "bi-moon-stars"),
+                                                    "Construction" => ("text-primary bg-primary-soft", "工事中", "bi-cone-striped"),
+                                                    "NoSignal" => ("text-primary bg-primary-soft", "信号機なし", "bi-traffic-light"),
+                                                    _ => ("text-primary bg-primary-soft", category, "bi-geo-alt")
+                                                };
+
+                                                <span class="category-tag px-3 py-1 rounded-pill @tagClass">
+                                                    <i class="bi @icon me-1"></i> @displayName
+                                                </span>
+                                            }
+                                        </div>
                                     </div>
                                     <div class="list-group-item d-flex justify-content-between align-items-center p-3">
                                         <span class="text-muted fw-bold small text-uppercase">登録日時</span>
@@ -143,7 +150,11 @@
                                         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary py-3 rounded-pill fw-bold shadow-sm">
                                             <i class="bi bi-pencil-square me-2"></i> 投稿を編集する
                                         </a>
-                                        <button type="button" class="btn btn-outline-danger py-3 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                        <button type="button" class="btn btn-outline-danger py-3 rounded-pill fw-bold shadow-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal"
+                                                data-id="@Model.Id"
+                                                data-title="@Model.Title">
                                             <i class="bi bi-trash3-fill me-2"></i> 投稿を削除する
                                         </button>
                                     </div>
@@ -157,7 +168,27 @@
     </div>
 </div>
 
-<!-- ... (Modal and Style sections remain same, but adding Leaflet scripts) -->
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="deleteModalLabel">削除の確認</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="mb-0 text-muted">「<span id="deleteItemTitle" class="fw-bold text-dark"></span>」を削除してもよろしいですか？この操作は取り消せません。</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light px-4 fw-bold" data-bs-dismiss="modal">キャンセル</button>
+                <form id="deleteForm" asp-action="Delete" method="post">
+                    <input type="hidden" name="id" id="deleteItemId" value="" />
+                    <button type="submit" class="btn btn-danger px-4 fw-bold">削除する</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>
@@ -177,6 +208,18 @@
             });
         }
         window.initMap = initMap;
+
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const title = button.getAttribute('data-title');
+                
+                document.getElementById('deleteItemId').value = id;
+                document.getElementById('deleteItemTitle').textContent = title;
+            });
+        }
     </script>
 }
 
