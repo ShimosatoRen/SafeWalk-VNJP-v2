@@ -118,6 +118,41 @@ public sealed class AccountController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ExchangePoints()
+    {
+        // ログインユーザーを取得
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
+        // 10ポイント必要（テスト用）
+        if (user.Points < 10)
+        {
+            TempData["ErrorMessage"] = "ポイントが不足しています。（10ポイント必要です）";
+            return RedirectToAction("Index", "Home");
+        }
+
+        // ポイント消費
+        user.Points -= 10;
+        
+        // 広告非表示期間を付与（24時間）
+        // 現在の期限が切れていれば現在から24時間、そうでなければ既存の期限から24時間延長
+        if (user.AdFreeUntil == null || user.AdFreeUntil < DateTime.UtcNow)
+        {
+            user.AdFreeUntil = DateTime.UtcNow.AddHours(24);
+        }
+        else
+        {
+            user.AdFreeUntil = user.AdFreeUntil.Value.AddHours(24);
+        }
+
+        await _userManager.UpdateAsync(user);
+        
+        TempData["SuccessMessage"] = "10ポイントを消費し、広告非表示特典を獲得しました！";
+        return RedirectToAction("Index", "Home");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();

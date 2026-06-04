@@ -185,16 +185,13 @@ public class DangerSpotsController : Controller
 
             _context.Add(dangerSpot);
             
-            // Grant 24-hour ad-free reward
-            user.AdFreeUntil = DateTime.UtcNow.AddHours(24);
-            
-            // Grant 10 points
+            // 投稿報酬として10ポイントを付与
             user.Points += 10;
             
             await _userManager.UpdateAsync(user);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "投稿が完了しました！報酬として10ポイントと24時間の広告非表示特典が付与されました。";
+            TempData["SuccessMessage"] = "投稿が完了しました！報酬として10ポイントが付与されました。";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception)
