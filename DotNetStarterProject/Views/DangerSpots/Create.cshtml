@@ -31,19 +31,119 @@
                             <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
-                        <div class="form-floating mb-3">
-                            <select asp-for="Category" class="form-select border-0 bg-light">
-                                <option value="">カテゴリを選択</option>
-                                <option value="Crossing">横断困難</option>
-                                <option value="NoSidewalk">歩道未整備</option>
-                                <option value="HeavyTraffic">バイク交通量過多</option>
-                                <option value="Flood">冠水エリア</option>
-                                <option value="NightRisk">夜間危険</option>
-                                <option value="Construction">工事中</option>
-                                <option value="NoSignal">信号機なし</option>
-                            </select>
-                            <label asp-for="Category" class="text-muted">カテゴリ</label>
-                            <span asp-validation-for="Category" class="text-danger small"></span>
+                        @{
+                            var selectedCategories = Model?.Category?
+                                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(x => x.Trim())
+                                .ToList()
+                                ?? new List<string>();
+                        }
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-bold">
+                                カテゴリ（複数選択可）
+                            </label>
+
+                            <div class="row g-2">
+
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="SelectedCategories"
+                                               value="Crossing"
+                                               @(selectedCategories.Contains("Crossing") ? "checked" : "")>
+                                        <label class="form-check-label">
+                                            横断困難
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="SelectedCategories"
+                                               value="NoSidewalk"
+                                               @(selectedCategories.Contains("NoSidewalk") ? "checked" : "")>
+                                        <label class="form-check-label">
+                                            歩道未整備
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="SelectedCategories"
+                                               value="HeavyTraffic"
+                                               @(selectedCategories.Contains("HeavyTraffic") ? "checked" : "")>
+                                        <label class="form-check-label">
+                                            バイク交通量過多
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="SelectedCategories"
+                                               value="Flood"
+                                               @(selectedCategories.Contains("Flood") ? "checked" : "")>
+                                        <label class="form-check-label">
+                                            冠水エリア
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="SelectedCategories"
+                                               value="NightRisk"
+                                               @(selectedCategories.Contains("NightRisk") ? "checked" : "")>
+                                        <label class="form-check-label">
+                                            夜間危険
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="SelectedCategories"
+                                               value="Construction"
+                                               @(selectedCategories.Contains("Construction") ? "checked" : "")>
+                                        <label class="form-check-label">
+                                            工事中
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="SelectedCategories"
+                                               value="NoSignal"
+                                               @(selectedCategories.Contains("NoSignal") ? "checked" : "")>
+                                        <label class="form-check-label">
+                                            信号機なし
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <span asp-validation-for="Category"
+                                  class="text-danger small">
+                            </span>
+
                         </div>
 
                         <div class="form-floating mb-4">
@@ -208,7 +308,7 @@
             }
         });
 
-        removeButton.addEventListener('click', function() {
+                removeButton.addEventListener('click', function() {
             imageInput.value = '';
             previewContainer.classList.add('d-none');
             imagePreview.src = '#';

@@ -24,13 +24,41 @@
                     <label class="form-label small fw-bold text-muted">カテゴリ</label>
                     <select name="category" class="form-select border-0 bg-light">
                         <option value="">すべて</option>
-                        <option selected="@(currentCategory == "横断困難")">横断困難</option>
-                        <option selected="@(currentCategory == "歩道未整備")">歩道未整備</option>
-                        <option selected="@(currentCategory == "バイク交通量過多")">バイク交通量過多</option>
-                        <option selected="@(currentCategory == "冠水エリア")">冠水エリア</option>
-                        <option selected="@(currentCategory == "夜間危険")">夜間危険</option>
-                        <option selected="@(currentCategory == "工事中")">工事中</option>
-                        <option selected="@(currentCategory == "信号機なし")">信号機なし</option>
+
+                        <option value="Crossing"
+                                selected="@(currentCategory == "Crossing")">
+                            横断困難
+                        </option>
+
+                        <option value="NoSidewalk"
+                                selected="@(currentCategory == "NoSidewalk")">
+                            歩道未整備
+                        </option>
+
+                        <option value="HeavyTraffic"
+                                selected="@(currentCategory == "HeavyTraffic")">
+                            バイク交通量過多
+                        </option>
+
+                        <option value="Flood"
+                                selected="@(currentCategory == "Flood")">
+                            冠水エリア
+                        </option>
+
+                        <option value="NightRisk"
+                                selected="@(currentCategory == "NightRisk")">
+                            夜間危険
+                        </option>
+
+                        <option value="Construction"
+                                selected="@(currentCategory == "Construction")">
+                            工事中
+                        </option>
+
+                        <option value="NoSignal"
+                                selected="@(currentCategory == "NoSignal")">
+                            信号機なし
+                        </option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -90,8 +118,11 @@
                             </div>
                         }
                         <div class="position-absolute top-0 end-0 p-3 d-flex flex-column gap-2">
-                            <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(item.ReportCount) shadow-sm px-3 py-2 rounded-pill fw-bold">
-                                @DangerLevelHelper.GetDangerLevel(item.ReportCount)
+                            <span class="badge bg-@DangerLevelHelper.GetBootstrapClass(item.Level) shadow-sm px-3 py-2 rounded-pill fw-bold">
+                                判定: @DangerLevelHelper.GetDangerLevel(item.Level)
+                            </span>
+                            <span class="badge bg-light text-dark shadow-sm px-3 py-2 rounded-pill fw-bold small">
+                                報告: @item.ReportCount 件
                             </span>
                             <span class="badge @(item.Status == DangerSpotStatus.Resolved ? "bg-success" : (item.Status == DangerSpotStatus.Confirmed ? "bg-warning" : "bg-secondary")) shadow-sm px-3 py-2 rounded-pill fw-bold">
                                 @item.Status
@@ -100,22 +131,28 @@
                     </div>
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            @{
-                                var (tagClass, displayName, icon) = item.Category switch
+                            <div class="d-flex flex-wrap gap-1">
+
+                                @foreach (var category in item.Category.Split(',', StringSplitOptions.RemoveEmptyEntries))
                                 {
-                                    "Crossing" => ("text-danger", "横断困難", "bi-signpost-2"),
-                                    "NoSidewalk" => ("text-warning", "歩道未整備", "bi-hammer"),
-                                    "HeavyTraffic" => ("text-warning", "バイク交通量過多", "bi-bicycle"),
-                                    "Flood" => ("text-info", "冠水エリア", "bi-water"),
-                                    "NightRisk" => ("text-secondary", "夜間危険", "bi-moon-stars"),
-                                    "Construction" => ("text-primary", "工事中", "bi-cone-striped"),
-                                    "NoSignal" => ("text-primary", "信号機なし", "bi-traffic-light"),
-                                    _ => ("text-primary", item.Category, "bi-geo-alt")
-                                };
-                            }
-                            <span class="category-tag @tagClass">
-                                <i class="bi @icon"></i> @displayName
-                            </span>
+                                    var (tagClass, displayName, icon) = category switch
+                                    {
+                                        "Crossing" => ("text-danger", "横断困難", "bi-signpost-2"),
+                                        "NoSidewalk" => ("text-warning", "歩道未整備", "bi-hammer"),
+                                        "HeavyTraffic" => ("text-warning", "バイク交通量過多", "bi-bicycle"),
+                                        "Flood" => ("text-info", "冠水エリア", "bi-water"),
+                                        "NightRisk" => ("text-secondary", "夜間危険", "bi-moon-stars"),
+                                        "Construction" => ("text-primary", "工事中", "bi-cone-striped"),
+                                        "NoSignal" => ("text-primary", "信号機なし", "bi-traffic-light"),
+                                        _ => ("text-dark", category, "bi-geo-alt")
+                                    };
+
+                                    <span class="category-tag @tagClass">
+                                        <i class="bi @icon"></i> @displayName
+                                    </span>
+                                }
+
+                            </div>
                             <small class="text-muted"><i class="bi bi-clock me-1"></i>@item.CreatedAt.ToLocalTime().ToString("MM/dd HH:mm")</small>
                         </div>
                         <h5 class="card-title fw-bold mb-3">@item.Title</h5>

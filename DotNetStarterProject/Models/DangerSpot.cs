@@ -25,7 +25,7 @@ public class DangerSpot
     public string Description { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "カテゴリを選択してください。")]
-    [MaxLength(50)]
+    [MaxLength(200, ErrorMessage = "カテゴリの選択が多すぎます。")]
     [Display(Name = "カテゴリ")]
     public string Category { get; set; } = string.Empty;
 
@@ -56,4 +56,7 @@ public class DangerSpot
 
     [NotMapped]
     public int ReportCount { get; set; }
+
+    [NotMapped]
+    public int Level { get; set; }
 }
