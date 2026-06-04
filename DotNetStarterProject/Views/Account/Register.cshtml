@@ -44,7 +44,7 @@
                        placeholder="パスワードを再入力">
             </div>
 
-            <button class="btn btn-primary w-100">
+            <button type="submit" class="btn btn-primary w-100">
                 登録する
             </button>
 
@@ -68,4 +68,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/auth-feedback.js" asp-append-version="true"></script>
 }
