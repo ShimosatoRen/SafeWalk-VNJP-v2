@@ -65,7 +65,7 @@ public sealed class AccountController : Controller
 
         if (user == null)
         {
-            ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。");
+            ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。入力内容をご確認のうえ、再度お試しください。");
             return View(model);
         }
 
@@ -73,14 +73,26 @@ public sealed class AccountController : Controller
             user.UserName!,
             model.Password,
             model.RememberMe,
-            false);
+            lockoutOnFailure: true);
 
         if (result.Succeeded)
         {
             return RedirectToAction("Index", "Home");
         }
 
-        ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。");
+        if (result.IsLockedOut)
+        {
+            ModelState.AddModelError("", "連続してログインに失敗したため、アカウントが一時的にロックされました。5分後に再度お試しください。");
+            return View(model);
+        }
+
+        if (result.IsNotAllowed)
+        {
+            ModelState.AddModelError("", "このアカウントはまだ有効化されていません。メールを確認してください。");
+            return View(model);
+        }
+
+        ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。入力内容をご確認のうえ、再度お試しください。");
         return View(model);
     }
 
