@@ -174,6 +174,49 @@ public sealed class AccountController : Controller
         return RedirectToAction("Index", "Home");
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        var user = await _userManager.Users
+            .Include(u => u.DangerSpots)
+            .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+
+        if (user == null) return Challenge();
+
+        // 固定のadminユーザーは削除不可
+        if (user.UserName == "admin")
+        {
+            TempData["ErrorMessage"] = "この管理者アカウントは削除できません。";
+            return RedirectToAction(nameof(MyPage));
+        }
+
+        // 物理ファイルの削除
+        foreach (var spot in user.DangerSpots)
+        {
+            if (!string.IsNullOrEmpty(spot.ImagePath))
+            {
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", spot.ImagePath.TrimStart('/'));
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+        }
+
+        var result = await _userManager.DeleteAsync(user);
+        if (result.Succeeded)
+        {
+            await _signInManager.SignOutAsync();
+            TempData["SuccessMessage"] = "アカウントと関連データをすべて削除しました。ご利用ありがとうございました。";
+            return RedirectToAction("Index", "Home");
+        }
+
+        TempData["ErrorMessage"] = "アカウントの削除中にエラーが発生しました。";
+        return RedirectToAction(nameof(MyPage));
+    }
+
     private void AddIdentityErrors(IdentityResult result)
     {
         foreach (var error in result.Errors)

@@ -113,6 +113,32 @@
             </div>
         </div>
     </div>
+    <!-- アカウント設定エリア -->
+    <div class="mt-5 pt-4 border-top">
+        <h5 class="text-danger fw-bold mb-3"><i class="bi bi-gear-fill me-2"></i>アカウント設定</h5>
+        <div class="card border-danger border-opacity-25 bg-danger bg-opacity-10 rounded-4">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <h6 class="fw-bold mb-1 text-danger">アカウントの削除</h6>
+                    <p class="text-muted small mb-0">一度削除したアカウントや投稿データは元に戻せません。ご注意ください。</p>
+                </div>
+                @if (Model.UserName == "admin")
+                {
+                    <button class="btn btn-outline-danger btn-sm disabled" title="管理者は削除できません">
+                        <i class="bi bi-exclamation-octagon me-1"></i> アカウント削除不可
+                    </button>
+                }
+                else
+                {
+                    <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('本当にアカウントを削除しますか？\n全てのデータが失われ、元に戻すことはできません。')">
+                        <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4">
+                            <i class="bi bi-trash3-fill me-1"></i> アカウントを完全に削除する
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- 削除用モーダル -->
