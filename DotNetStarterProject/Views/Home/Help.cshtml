@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "ヘルプ・使い方";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white py-4 border-0 text-center">
+                    <h2 class="mb-0"><i class="bi bi-geo-alt-fill text-danger me-2"></i>ご利用ガイド</h2>
+                    <p class="mb-0 opacity-75 mt-2">SafeWalk VNJP の使い方</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    
+                    <!-- Visual Step-by-Step Guide -->
+                    <div class="row text-center g-4 mb-5">
+                        <div class="col-4">
+                            <div class="p-3 bg-light rounded-4 h-100">
+                                <div class="display-5 text-warning mb-2"><i class="bi bi-eye"></i></div>
+                                <div class="fw-bold small text-uppercase">1. 見つける</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">街の危険な場所を<br>発見する</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3 bg-light rounded-4 h-100 border border-primary border-2 shadow-sm">
+                                <div class="display-5 text-primary mb-2"><i class="bi bi-camera-fill"></i></div>
+                                <div class="fw-bold small text-uppercase">2. 投稿する</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">情報を共有して<br>みんなに知らせる</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3 bg-light rounded-4 h-100">
+                                <div class="display-5 text-success mb-2"><i class="bi bi-coin"></i></div>
+                                <div class="fw-bold small text-uppercase">3. もらう</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">ポイントを貯めて<br>特典をゲット</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Icons Guide -->
+                    <section class="mb-5">
+                        <h5 class="text-primary fw-bold mb-4 border-start border-4 border-primary ps-3">投稿カテゴリの例</h5>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3 text-center">
+                                <div class="p-3 border rounded-3 bg-white shadow-sm h-100">
+                                    <i class="bi bi-cone-striped fs-1 text-danger"></i>
+                                    <div class="mt-2 small fw-bold">工事現場</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">道がふさがっている</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 text-center">
+                                <div class="p-3 border rounded-3 bg-white shadow-sm h-100">
+                                    <i class="bi bi-cloud-rain-heavy fs-1 text-primary"></i>
+                                    <div class="mt-2 small fw-bold">冠水エリア</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">雨で通りにくい</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 text-center">
+                                <div class="p-3 border rounded-3 bg-white shadow-sm h-100">
+                                    <i class="bi bi-brightness-low fs-1 text-warning"></i>
+                                    <div class="mt-2 small fw-bold">暗い道</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">街灯がなくて危ない</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 text-center">
+                                <div class="p-3 border rounded-3 bg-white shadow-sm h-100">
+                                    <i class="bi bi-exclamation-triangle fs-1 text-dark"></i>
+                                    <div class="mt-2 small fw-bold">その他</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">注意が必要な場所</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Point Reward Visual -->
+                    <section class="mb-4">
+                        <h5 class="text-primary fw-bold mb-4 border-start border-4 border-primary ps-3">ポイントと特典</h5>
+                        <div class="bg-info bg-opacity-10 p-4 rounded-4 text-center border border-info border-dashed">
+                            <div class="d-flex justify-content-center align-items-center mb-3">
+                                <div class="text-center px-3">
+                                    <div class="fs-2 fw-bold text-success">10 <i class="bi bi-coin"></i></div>
+                                    <div class="small fw-bold">ポイント</div>
+                                </div>
+                                <div class="fs-1 text-muted mx-3"><i class="bi bi-arrow-right"></i></div>
+                                <div class="text-center px-3 position-relative">
+                                    <div class="fs-2 text-primary">
+                                        <i class="bi bi-megaphone-fill"></i>
+                                        <span class="position-absolute top-50 start-50 translate-middle text-danger opacity-75" style="font-size: 3rem;">
+                                            <i class="bi bi-slash-circle"></i>
+                                        </span>
+                                    </div>
+                                    <div class="small fw-bold mt-2">広告非表示</div>
+                                </div>
+                            </div>
+                            <p class="mb-0 small text-muted">10ポイント貯まると、アプリ内の広告を消すことができます。<br>投稿して安全な街づくりに貢献しましょう！</p>
+                        </div>
+                    </section>
+
+                </div>
+                <div class="card-footer bg-light py-3 text-center border-0">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary rounded-pill px-5 fw-bold">閉じる</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-dashed { border-style: dashed !important; }
+</style>

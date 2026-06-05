@@ -41,6 +41,12 @@ namespace DotNetStarterProject.Controllers
             return View(dangerSpots);
         }
 
+        [AllowAnonymous]
+        public IActionResult Help()
+        {
+            return View();
+        }
+
         [Authorize]
         public IActionResult Privacy()
         {
