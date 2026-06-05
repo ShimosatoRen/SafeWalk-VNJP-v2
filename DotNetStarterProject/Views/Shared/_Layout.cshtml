@@ -17,8 +17,29 @@
     
     <!-- Google Translate API -->
     <style>
-        .goog-te-banner-frame.skiptranslate { display: none !important; }
-        body { top: 0px !important; }
+        /* デフォルトのGoogle翻訳ボタンを完全に隠す */
+        #google_translate_element {
+            display: none !important;
+        }
+        /* 翻訳後に上部に出るバナーを消す */
+        .goog-te-banner-frame.skiptranslate {
+            display: none !important;
+        }
+        body {
+            top: 0px !important;
+        }
+        /* 翻訳後の青い枠線やツールチップを消す */
+        .goog-tooltip {
+            display: none !important;
+        }
+        .goog-tooltip:hover {
+            display: none !important;
+        }
+        .goog-text-highlight {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -77,10 +98,15 @@
                     // 投稿件数を取得（DBから集計）
                     var postCount = user.DangerSpots.Count;
                     <div class="mb-3">
-                    <a asp-controller="Account" asp-action="MyPage" class="d-flex align-items-center mb-2 text-white text-decoration-none">
-                        <i class="bi bi-person-circle fs-3 me-2"></i>
-                        <span class="fw-bold">@User.Identity?.Name</span>
-                    </a>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <a asp-controller="Account" asp-action="MyPage" class="d-flex align-items-center text-white text-decoration-none">
+                            <i class="bi bi-person-circle fs-3 me-2"></i>
+                            <span class="fw-bold">@User.Identity?.Name</span>
+                        </a>
+                        <a asp-controller="Home" asp-action="Help" class="btn btn-sm btn-outline-info rounded-circle" title="ヘルプ">
+                            <i class="bi bi-question"></i>
+                        </a>
+                    </div>
                     <div class="small"><i class="bi bi-pencil-square me-2"></i> 投稿数: @postCount 件</div>
                     <div class="small"><i class="bi bi-coin me-2"></i> ポイント: @user?.Points pt</div>
                     </div>
@@ -96,8 +122,12 @@
                     <div class="mb-3">
                         <i class="bi bi-person-circle fs-3 me-2"></i> ゲストユーザー
                     </div>
-                    <a class="btn btn-primary w-100 mb-2" asp-controller="Account" asp-action="Login">ログイン</a>
-                    <a class="btn btn-outline-light w-100" asp-controller="Account" asp-action="Register">新規登録</a>
+                    <a class="btn btn-primary w-100 mb-2" asp-controller="Account" asp-action="Login">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> ログイン
+                    </a>
+                    <a class="btn btn-outline-light w-100" asp-controller="Account" asp-action="Register">
+                        <i class="bi bi-person-plus-fill me-2"></i> 新規登録
+                    </a>
                 }
             </div>
         </div>
