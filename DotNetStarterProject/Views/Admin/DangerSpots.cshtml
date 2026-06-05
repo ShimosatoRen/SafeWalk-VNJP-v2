@@ -1,0 +1,66 @@
+@model IEnumerable<DotNetStarterProject.Models.DangerSpot>
+@{
+    ViewData["Title"] = "投稿管理";
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-circle me-3">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="m-0 fw-bold">投稿管理</h2>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var spot in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                    @if (!string.IsNullOrEmpty(spot.ImagePath))
+                    {
+                        <img src="@spot.ImagePath" class="card-img-top" alt="@spot.Title" style="height: 180px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                            <i class="bi bi-image text-muted fs-1"></i>
+                        </div>
+                    }
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold m-0">@spot.Title</h5>
+                            <span class="badge @(spot.Status == DangerSpotStatus.Open ? "bg-warning text-dark" : spot.Status == DangerSpotStatus.Confirmed ? "bg-primary" : "bg-success") rounded-pill">
+                                @(spot.Status == DangerSpotStatus.Open ? "未対応" : spot.Status == DangerSpotStatus.Confirmed ? "確認済み" : "解決済み")
+                            </span>
+                        </div>
+                        <p class="card-text text-muted small mb-3">@spot.Description</p>
+                        <div class="d-flex align-items-center small text-muted mb-3">
+                            <i class="bi bi-person me-1"></i> @spot.User?.UserName
+                            <i class="bi bi-clock ms-3 me-1"></i> @spot.CreatedAt.ToLocalTime().ToString("MM/dd HH:mm")
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <form asp-action="UpdateStatus" method="post" class="flex-grow-1">
+                                <input type="hidden" name="id" value="@spot.Id" />
+                                <select name="status" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+                                    <option value="@DangerSpotStatus.Open" selected="@(spot.Status == DangerSpotStatus.Open)">未対応にする</option>
+                                    <option value="@DangerSpotStatus.Confirmed" selected="@(spot.Status == DangerSpotStatus.Confirmed)">確認済みにする</option>
+                                    <option value="@DangerSpotStatus.Resolved" selected="@(spot.Status == DangerSpotStatus.Resolved)">解決済みにする</option>
+                                </select>
+                            </form>
+                            <form asp-action="DeleteSpot" method="post" onsubmit="return confirm('本当に削除しますか？')">
+                                <input type="hidden" name="id" value="@spot.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <a asp-controller="DangerSpots" asp-action="Details" asp-route-id="@spot.Id" class="btn btn-sm btn-link text-decoration-none">詳細を見る</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,99 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<DotNetStarterProject.Models.ApplicationUser> UserManager
+@model IEnumerable<DotNetStarterProject.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "ユーザー管理";
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-circle me-3">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="m-0 fw-bold">ユーザー管理</h2>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">ユーザー名 / メール</th>
+                        <th>登録日</th>
+                        <th>ポイント</th>
+                        <th>広告非表示</th>
+                        <th>権限</th>
+                        <th class="text-end pe-4">アクション</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        var isAdmin = await UserManager.IsInRoleAsync(user, "Admin");
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold">@user.UserName</div>
+                                <div class="small text-muted">@user.Email</div>
+                            </td>
+                            <td>@user.RegistrationDate.ToLocalTime().ToString("yyyy/MM/dd")</td>
+                            <td>
+                                <form asp-action="AdjustPoints" method="post" class="d-flex align-items-center" style="max-width: 150px;">
+                                    <input type="hidden" name="userId" value="@user.Id" />
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" name="points" value="@user.Points" class="form-control rounded-start-pill text-center" min="0" />
+                                        <button type="submit" class="btn btn-outline-info rounded-end-pill px-2">
+                                            <i class="bi bi-check2"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </td>
+                            <td>
+                                @if (user.AdFreeUntil > DateTime.UtcNow)
+                                {
+                                    <span class="badge bg-success rounded-pill">有効</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary rounded-pill">無効</span>
+                                }
+                            </td>
+                            <td>
+                                @if (isAdmin)
+                                {
+                                    <span class="badge bg-dark rounded-pill">管理者</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-light text-dark border rounded-pill">一般ユーザー</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                @if (user.UserName != "admin")
+                                {
+                                    <div class="btn-group">
+                                        <form asp-action="ToggleAdmin" method="post" class="d-inline">
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-sm @(isAdmin ? "btn-outline-danger" : "btn-outline-dark") rounded-start-pill">
+                                                @(isAdmin ? "管理者から外す" : "管理者に昇格")
+                                            </button>
+                                        </form>
+                                        <form asp-action="DeleteUser" method="post" class="d-inline" onsubmit="return confirm('本当にこのユーザーを削除しますか？この操作は取り消せません。')">
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-end-pill px-3">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">操作不可</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

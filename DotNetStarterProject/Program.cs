@@ -37,11 +37,43 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Automatic Migration
+// Automatic Migration and Admin Seeding
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    // Create Admin Role if not exists
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
+
+    // Create Default Admin User from Configuration
+    var adminConfig = app.Configuration.GetSection("AdminAccount");
+    var adminEmail = adminConfig["Email"] ?? "admin@example.com";
+    var adminUserName = adminConfig["UserName"] ?? "admin";
+    var adminPassword = adminConfig["Password"];
+
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null && !string.IsNullOrEmpty(adminPassword))
+    {
+        adminUser = new ApplicationUser
+        {
+            UserName = adminUserName,
+            Email = adminEmail,
+            EmailConfirmed = true,
+            RegistrationDate = DateTime.UtcNow
+        };
+        var result = await userManager.CreateAsync(adminUser, adminPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.
